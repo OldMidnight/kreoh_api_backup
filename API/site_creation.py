@@ -24,11 +24,19 @@ def validate_domain():
 def register_website():
     user_id = get_jwt_identity()
     user = User.query.filter_by(u_id=user_id).first()
-    data = request.get_json()
-    print(data)
+    data = request.get_json()['site_props']
     site_props = json.dumps(data)
-    print(site_props)
     website = Website(user_id=user_id, domain=user.domain, site_props=site_props)
     website.add()
     website.site_activation()
+    return jsonify(), 200
+
+@bp.route('/update_site', methods=('POST',))
+@jwt_required
+def update_website():
+    user_id = get_jwt_identity()
+    data = request.get_json()['site_props']
+    new_site_props = json.dumps(data)
+    website = Website.query.filter_by(user_id=user_id).first()
+    website.update_site(new_site_props)
     return jsonify(), 200

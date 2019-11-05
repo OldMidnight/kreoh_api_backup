@@ -8,7 +8,7 @@ from API.models import db
 
 app = Flask(__name__, instance_relative_config=True)
 app.config.from_pyfile('config.py')
-CORS(app, supports_credentials=True, origins=['http://localhost:8080', 'https?://([a-z0-9]+[.])*localhost:8080'])
+CORS(app, supports_credentials=True, origins=['http://localhost:3000/*', 'http://localhost:8080', 'https?://([a-z0-9]+[.])*localhost:3000', 'https?://([a-z0-9]+[.])*localhost:8080'])
 # https?://([a-z0-9]+[.])*sub[12]domain[.]com
 jwt = JWTManager(app)
 

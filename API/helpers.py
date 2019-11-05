@@ -17,7 +17,6 @@ def api_test():
 def refresh():
     user = get_jwt_identity()
     new_token = create_access_token(identity=user, fresh=False)
-    print(new_token)
     return jsonify(access_token=new_token), 201
 
 @bp.route('/site_config/site_activation', methods=('POST',))
@@ -26,21 +25,19 @@ def site_activation():
     user_id = get_jwt_identity()
     website = Website.query.filter_by(user_id=user_id).first()
     website.site_activation()
-    print('test')
-    print(website.active)
     return jsonify(active=website.active), 200
 
 @bp.route('/get_site_active', methods=('GET',))
 @jwt_required
 def get_site_active():
     user_id = get_jwt_identity()
-    print(user_id)
     user = User.query.filter_by(u_id=user_id).first()
-    print(user)
     website = Website.query.filter_by(user_id=user.u_id).first()
     if website is None:
+        print('no site')
         return jsonify(site_active=False, site_available=False)
     else:
+        print(website.active)
         return jsonify(site_active=website.active, site_available=True)
 
 @bp.route('/check_domain', methods=('POST',))
@@ -64,6 +61,15 @@ def get_site_config():
     website = Website.query.filter_by(user_id=user.u_id).first()
     site_config = json.loads(website.site_props)
     return jsonify(site_config=site_config), 200
+
+@bp.route('/auth_site_config', methods=('GET',))
+@jwt_required
+def get_auth_site_config():
+    user_id = get_jwt_identity()
+    website = Website.query.filter_by(user_id=user_id).first()
+    site_config = json.loads(website.site_props)
+    return jsonify(site_config=site_config), 200
+
 
 @bp.route('/get_site', methods=('POST',))
 @jwt_required

@@ -18,14 +18,19 @@ def register():
     password = data['password']
     domain = data['domain']
     user = User.query.filter_by(domain=domain).first()
-    print(user)
     if user is None:
         user = User(domain=domain, email=email, f_name=f_name, s_name=s_name, password=generate_password_hash(password))
         user.add()
         user = User.query.filter_by(domain=domain).first()
         access_token = create_access_token(user.u_id, fresh=True)
         refresh_token = create_refresh_token(user.u_id)
-        return jsonify(id=user.u_id, domain=user.domain, f_name=f_name, s_name=s_name, access_token=access_token, refresh_token=refresh_token), 200
+        # user_data = {
+        #     'id': user.u_id,
+        #     'domain': user.domain,fd
+        #     'f_name': f_name,
+        #     's_name': s_name
+        # }
+        return jsonify(access_token=access_token, refresh_token=refresh_token), 200
     else:
         return jsonify(error="unable to create user"), 401
 
@@ -42,3 +47,10 @@ def login():
         return jsonify(id=user.u_id, domain=user.domain, f_name=user.f_name, s_name=user.s_name, access_token=access_token, refresh_token=refresh_token), 200
     else:
         return jsonify(error="unable to login"), 401
+
+@bp.route('/user', methods=('GET',))
+@jwt_required
+def get_user():
+    user_id = get_jwt_identity()
+    user = User.query.filter_by(u_id=user_id).first()
+    return jsonify(id=user.u_id, f_name=user.f_name, s_name=user.s_name, domain=user.domain, email=user.email), 200

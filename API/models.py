@@ -25,6 +25,10 @@ class Website(db.Model):
             self.activation_date = datetime.utcnow()
         db.session.commit()
 
+    def update_site(self, newValue):
+        self.site_props = newValue
+        db.session.commit()
+
 class User(db.Model):
     u_id = db.Column(db.Integer, primary_key=True)
     domain = db.Column(db.String(20), nullable=False, unique=True)
