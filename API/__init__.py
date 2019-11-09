@@ -13,8 +13,8 @@ CORS(app, supports_credentials=True, origins=['http://localhost:3000/*', 'http:/
 jwt = JWTManager(app)
 
 with app.app_context():
-    db.init_app(app)
-    print('Initialized Database')
+  db.init_app(app)
+  print('Initialized Database')
 
 app.register_blueprint(site_creation.bp)
 app.register_blueprint(auth.bp)
