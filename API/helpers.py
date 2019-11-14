@@ -34,10 +34,8 @@ def get_site_active():
   user = User.query.filter_by(u_id=user_id).first()
   website = Website.query.filter_by(user_id=user.u_id).first()
   if website is None:
-    print('no site')
     return jsonify(site_active=False, site_available=False)
   else:
-    print(website.active)
     return jsonify(site_active=website.active, site_available=True)
 
 @bp.route('/check_domain', methods=('POST',))
@@ -46,7 +44,9 @@ def check_domain():
   user = User.query.filter_by(domain=domain).first()
   if user:
     website = Website.query.filter_by(user_id=user.u_id).first()
-    if website.active:
+    if website is None:
+      return jsonify(available=False, active=False), 200
+    elif website.active:
       return jsonify(available=True, active=True), 200
     else:
       return jsonify(available=True, active=False), 200
@@ -59,8 +59,11 @@ def get_site_config():
   domain = data['domain']
   user = User.query.filter_by(domain=domain).first()
   website = Website.query.filter_by(user_id=user.u_id).first()
-  site_config = json.loads(website.site_props)
-  return jsonify(site_config=site_config), 200
+  if website is None:
+    return jsonify(error="No such website")
+  else:
+    site_config = json.loads(website.site_props)
+    return jsonify(site_config=site_config), 200
 
 @bp.route('/auth_site_config', methods=('GET',))
 @jwt_required

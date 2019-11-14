@@ -41,6 +41,7 @@ class User(db.Model):
   f_name = db.Column(db.String, nullable=False)
   s_name = db.Column(db.String, nullable=False)
   password = db.Column(db.String, nullable=False)
+  account_type = db.Column(db.String, nullable=False, default='Free')
 
   def add(self):
     db.session.add(self)

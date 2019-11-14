@@ -5,7 +5,7 @@ from flask_jwt_extended import (
     jwt_refresh_token_required, create_refresh_token
 )
 from werkzeug.security import check_password_hash, generate_password_hash
-from API.models import User
+from API.models import User, Website
 
 bp = Blueprint('auth', __name__, url_prefix="/auth")
 
@@ -53,4 +53,8 @@ def login():
 def get_user():
     user_id = get_jwt_identity()
     user = User.query.filter_by(u_id=user_id).first()
-    return jsonify(id=user.u_id, f_name=user.f_name, s_name=user.s_name, domain=user.domain, email=user.email), 200
+    website = Website.query.filter_by(user_id=user.u_id).first()
+    if website is None:
+      return jsonify(id=user.u_id, f_name=user.f_name, s_name=user.s_name, domain=user.domain, email=user.email, account_type=user.account_type, site_created=False), 200
+    else:
+      return jsonify(id=user.u_id, f_name=user.f_name, s_name=user.s_name, domain=user.domain, email=user.email, account_type=user.account_type, site_created=True), 200
