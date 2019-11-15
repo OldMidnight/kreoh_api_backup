@@ -42,7 +42,7 @@ def grab_screenshot():
   s.app = app
   s.capture('http://' + user.domain + '.localhost:3000/', current_app.config['UPLOAD_FOLDER'] + user.domain + '.kreoh.com.png')
   app.exec_()
-  app.exit()
+  app.quit()
   return jsonify(sreenshot_saved=True), 200
 
 @bp.route('/screenshot/<path:filename>', methods=('GET',))
