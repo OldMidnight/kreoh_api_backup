@@ -3,7 +3,7 @@ import os
 from flask import Flask
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
-from API import site_creation, auth, helpers, uploads
+from API import site_creation, auth, helpers, uploads, stats
 from API.models import db
 
 app = Flask(__name__, instance_relative_config=True)
@@ -20,3 +20,4 @@ app.register_blueprint(site_creation.bp)
 app.register_blueprint(auth.bp)
 app.register_blueprint(helpers.bp)
 app.register_blueprint(uploads.bp)
+app.register_blueprint(stats.bp)

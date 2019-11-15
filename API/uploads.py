@@ -40,7 +40,7 @@ def grab_screenshot():
     app = QApplication()
   s = Screenshot()
   s.app = app
-  s.capture('http://' + user.domain + '.localhost:3000/', '/home/fareed/Documents/Kreoh/kreoh_user_site_images/' + user.domain + '.kreoh.com.png')
+  s.capture('http://' + user.domain + '.localhost:3000/', current_app.config['UPLOAD_FOLDER'] + user.domain + '.kreoh.com.png')
   app.exec_()
   app.exit()
   return jsonify(sreenshot_saved=True), 200

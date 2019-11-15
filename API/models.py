@@ -33,6 +33,16 @@ class Website(db.Model):
     db.session.delete(self)
     db.session.commit()
 
+class WebsiteStats(db.Model):
+  record_id = db.Column(db.Integer, primary_key=True)
+  domain = db.Column(db.String, nullable=False)
+  visit_date_time = db.Column(db.DateTime, nullable=False)
+
+  def add(self):
+    db.session.add(self)
+    db.session.commit()
+
+
 class User(db.Model):
   u_id = db.Column(db.Integer, primary_key=True)
   domain = db.Column(db.String(20), nullable=False, unique=True)

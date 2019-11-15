@@ -1,7 +1,8 @@
-from flask import Blueprint, request, jsonify, Response
+import json
+from pathlib import Path
+from flask import Blueprint, request, jsonify, Response, current_app
 from flask_jwt_extended import jwt_required, get_jwt_identity, jwt_refresh_token_required, create_access_token
 from API.models import Website, User
-import json
 
 bp = Blueprint('helpers', __name__, url_prefix="/helper")
 
@@ -88,18 +89,16 @@ def get_site():
 @jwt_required
 def delete_site():
   user_id = get_jwt_identity()
-  website = Website.query.filter_by(user_id=user_id).all()
-  print('website list:', website)
-  if len(website) == 1:
-    website = website[0]
-    print('website:', website)
-  else:
-    return jsonify(error="Website could not be deleted."), 200
-
-  website.delete()
   website = Website.query.filter_by(user_id=user_id).first()
-  print('website 2:', website)
   if website is None:
-    return jsonify(success="Website deleted."), 200
-  else:
     return jsonify(error="Website could not be deleted."), 200
+  else:
+    domain = website.domain
+    website.delete()
+    website = Website.query.filter_by(user_id=user_id).first()
+    if website is None:
+      screenshot = Path(current_app.config['UPLOAD_FOLDER'] + domain + '.kreoh.com.png')
+      screenshot.unlink()
+      return jsonify(success="Website deleted."), 200
+    else:
+      return jsonify(error="Website could not be deleted."), 200
