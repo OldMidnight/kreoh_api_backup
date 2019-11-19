@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from datetime import timedelta
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import (
     jwt_required, create_access_token, get_jwt_identity,
@@ -24,12 +25,6 @@ def register():
         user = User.query.filter_by(domain=domain).first()
         access_token = create_access_token(user.u_id, fresh=True)
         refresh_token = create_refresh_token(user.u_id)
-        # user_data = {
-        #     'id': user.u_id,
-        #     'domain': user.domain,fd
-        #     'f_name': f_name,
-        #     's_name': s_name
-        # }
         return jsonify(access_token=access_token, refresh_token=refresh_token), 200
     else:
         return jsonify(error="unable to create user"), 401
@@ -42,9 +37,9 @@ def login():
     password = data['password']
     user = User.authenticate(email, password)
     if user:
-        access_token = create_access_token(user.u_id, fresh=True)
+        access_token = create_access_token(user.u_id, fresh=True, expires_delta=timedelta(minutes=3))
         refresh_token = create_refresh_token(user.u_id)
-        return jsonify(id=user.u_id, domain=user.domain, f_name=user.f_name, s_name=user.s_name, access_token=access_token, refresh_token=refresh_token), 200
+        return jsonify(access_token=access_token, refresh_token=refresh_token), 200
     else:
         return jsonify(error="unable to login"), 401
 
