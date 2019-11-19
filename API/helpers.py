@@ -1,4 +1,5 @@
 import json
+from datetime import timedelta
 from pathlib import Path
 from flask import Blueprint, request, jsonify, Response, current_app
 from flask_jwt_extended import jwt_required, get_jwt_identity, jwt_refresh_token_required, create_access_token
@@ -17,7 +18,7 @@ def api_test():
 @jwt_refresh_token_required
 def refresh():
   user = get_jwt_identity()
-  new_token = create_access_token(identity=user, fresh=False)
+  new_token = create_access_token(identity=user, fresh=False, expires_delta=timedelta(hours=3))
   return jsonify(access_token=new_token), 201
 
 @bp.route('/site_config/site_activation', methods=('POST',))

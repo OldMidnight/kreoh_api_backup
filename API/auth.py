@@ -23,7 +23,7 @@ def register():
         user = User(domain=domain, email=email, f_name=f_name, s_name=s_name, password=generate_password_hash(password))
         user.add()
         user = User.query.filter_by(domain=domain).first()
-        access_token = create_access_token(user.u_id, fresh=True)
+        access_token = create_access_token(user.u_id, fresh=True, expires_delta=timedelta(hours=3))
         refresh_token = create_refresh_token(user.u_id)
         return jsonify(access_token=access_token, refresh_token=refresh_token), 200
     else:
@@ -37,7 +37,7 @@ def login():
     password = data['password']
     user = User.authenticate(email, password)
     if user:
-        access_token = create_access_token(user.u_id, fresh=True, expires_delta=timedelta(minutes=3))
+        access_token = create_access_token(user.u_id, fresh=True, expires_delta=timedelta(hours=3))
         refresh_token = create_refresh_token(user.u_id)
         return jsonify(access_token=access_token, refresh_token=refresh_token), 200
     else:
