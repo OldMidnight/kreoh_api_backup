@@ -22,7 +22,7 @@ def fetch_weekly():
   current_time = datetime.utcnow()
   user_id = get_jwt_identity()
   user_domain = User.query.filter_by(u_id=user_id).first().domain
-  stats = WebsiteStats.query.filter(WebsiteStats.domain == user_domain, WebsiteStats.visit_date_time > (current_time - timedelta(days=7))).all()
+  stats = WebsiteStats.query.filter(WebsiteStats.domain == user_domain, WebsiteStats.visit_date_time > (current_time - timedelta(days=6))).all()
   data = {
     '0': [],
     '1': [],
