@@ -58,7 +58,10 @@ def fetch_weekly():
 
     temp_day = day
     while not data[str(temp_day)]:
-        temp_day = temp_day - 1
+        if temp_day == 0:
+            temp_day = 6
+        else:
+            temp_day = temp_day - 1
     last_visitor_time = data[str(temp_day)][-1]
 
     time_difference = str(current_time - last_visitor_time)

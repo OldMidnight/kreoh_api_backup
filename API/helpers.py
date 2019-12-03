@@ -7,13 +7,6 @@ from API.models import Website, User
 
 bp = Blueprint('helpers', __name__, url_prefix="/helper")
 
-@bp.route('/api_test', methods=('GET', 'POST',))
-def api_test():
-  if request.method == 'GET':
-    return jsonify(hello='world')
-  else:
-    return jsonify(hello='post')
-
 @bp.route('/refresh_token', methods=('POST',))
 @jwt_refresh_token_required
 def refresh():
@@ -26,6 +19,8 @@ def refresh():
 def site_activation():
   user_id = get_jwt_identity()
   website = Website.query.filter_by(user_id=user_id).first()
+  if website is None:
+    return jsonify(message='No website to toggle activation.'), 404
   website.site_activation()
   return jsonify(active=website.active), 200
 
@@ -36,9 +31,9 @@ def get_site_active():
   user = User.query.filter_by(u_id=user_id).first()
   website = Website.query.filter_by(user_id=user.u_id).first()
   if website is None:
-    return jsonify(site_active=False, site_available=False)
+    return jsonify(site_parked=False, site_available=False)
   else:
-    return jsonify(site_active=website.active, site_available=True)
+    return jsonify(site_parked=not(website.active), site_available=True)
 
 @bp.route('/check_domain', methods=('POST',))
 def check_domain():
@@ -72,8 +67,11 @@ def get_site_config():
 def get_auth_site_config():
   user_id = get_jwt_identity()
   website = Website.query.filter_by(user_id=user_id).first()
-  site_config = json.loads(website.site_props)
-  return jsonify(site_config=site_config), 200
+  if website is None:
+    return jsonify(site_not_created=True)
+  else:
+    site_config = json.loads(website.site_props)
+    return jsonify(site_config=site_config), 200
 
 
 @bp.route('/get_site', methods=('POST',))
@@ -89,17 +87,16 @@ def get_site():
 @bp.route('/delete_site', methods=('POST',))
 @jwt_required
 def delete_site():
-  user_id = get_jwt_identity()
-  website = Website.query.filter_by(user_id=user_id).first()
+  domain = request.get_json()['domain']
+  website = Website.query.filter_by(domain=domain).first()
   if website is None:
-    return jsonify(error="Website could not be deleted."), 200
+    return jsonify(message="Website could not be deleted. No Such website."), 404
   else:
-    domain = website.domain
     website.delete()
-    website = Website.query.filter_by(user_id=user_id).first()
-    if website is None:
-      screenshot = Path(current_app.config['UPLOAD_FOLDER'] + domain + '.kreoh.com.png')
+    website = Website.query.filter_by(domain=domain).first()
+    screenshot = Path(current_app.config['UPLOAD_FOLDER'] + domain + '.kreoh.com.png')
+    try:
       screenshot.unlink()
-      return jsonify(success="Website deleted."), 200
-    else:
-      return jsonify(error="Website could not be deleted."), 200
+    except FileNotFoundError:
+      pass
+    return jsonify(message="Website deleted."), 200

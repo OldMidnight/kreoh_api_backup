@@ -8,8 +8,8 @@ db = SQLAlchemy()
 
 class Website(db.Model):
   w_id = db.Column(db.Integer, primary_key=True)
-  user_id = db.Column(db.Integer, db.ForeignKey('user.u_id'), nullable=False)
-  domain = db.Column(db.String, db.ForeignKey('user.domain'), nullable=False)
+  user_id = db.Column(db.Integer, db.ForeignKey('user.u_id'), nullable=False, unique=True)
+  domain = db.Column(db.String, db.ForeignKey('user.domain'), nullable=False, unique=True)
   activation_date = db.Column(db.DateTime)
   active = db.Column(db.Boolean, nullable=False, default=False)
   site_props = db.Column(db.String)
@@ -21,7 +21,6 @@ class Website(db.Model):
   def site_activation(self):
     self.active = not self.active
     if self.active:
-        print('active')
         self.activation_date = datetime.utcnow()
     db.session.commit()
 

@@ -4,3 +4,4 @@ flask-SQLAlchemy
 psycopg2-binary
 Flask-Migrate
 Flask-Script
+pytest

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from datetime import timedelta
+import re
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import (
     jwt_required, create_access_token, get_jwt_identity,
@@ -18,6 +19,12 @@ def register():
     email = data['email']
     password = data['password']
     domain = data['domain']
+    if not re.fullmatch(r'[^@]+@[^@]+\.[^@]+', email):
+      return jsonify(message='Please check your email!'), 406
+    if not domain.isalnum():
+      return jsonify(message='Your domain can only contain letters and numbers!'), 406
+    if len(password) < 8 or len(password) > 25:
+      return jsonify(message='Invalid password.'), 406
     user = User.query.filter_by(domain=domain).first()
     if user is None:
         user = User(domain=domain, email=email, f_name=f_name, s_name=s_name, password=generate_password_hash(password))
@@ -25,14 +32,13 @@ def register():
         user = User.query.filter_by(domain=domain).first()
         access_token = create_access_token(user.u_id, fresh=True, expires_delta=timedelta(hours=3))
         refresh_token = create_refresh_token(user.u_id)
-        return jsonify(access_token=access_token, refresh_token=refresh_token), 200
+        return jsonify(access_token=access_token, refresh_token=refresh_token, message=email + ' user created.'), 201
     else:
-        return jsonify(error="unable to create user"), 401
+        return jsonify(message="unable to create user"), 401
 
 @bp.route('/login', methods=('POST',))
 def login():
     data = request.get_json()
-    print(data)
     email = data['email']
     password = data['password']
     user = User.authenticate(email, password)
@@ -41,7 +47,7 @@ def login():
         refresh_token = create_refresh_token(user.u_id)
         return jsonify(access_token=access_token, refresh_token=refresh_token), 200
     else:
-        return jsonify(error="unable to login"), 401
+        return jsonify(message="Invalid Email or Password."), 400
 
 @bp.route('/user', methods=('GET',))
 @jwt_required
