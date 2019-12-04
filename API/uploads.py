@@ -57,16 +57,9 @@ def grab_screenshot():
   return jsonify(screenshot_saved=True), 200
 
 @bp.route('/screenshot/<path:filename>', methods=('GET',))
-@jwt_required
 def display_screenshot(filename):
-  user_id = get_jwt_identity()
-  website = Website.query.filter_by(user_id=user_id).first()
-  if website is None:
-    return jsonify(screenshot_saved=False, message='No such Website.'), 404
-  elif not website.active:
-    return jsonify(screenshot_saved=False, message='Website Disabled.'), 200
   try:
-    screenshot = bucket.download_fileobj(website.domain + '.kreoh.com.png')
+    screenshot = bucket.download_fileobj(filename)
   except botocore.exceptions.ClientError as e:
     if e.response['Error']['Code'] == "404":
       return jsonify(screenshot_saved=False, message='No such Image.'), 404
