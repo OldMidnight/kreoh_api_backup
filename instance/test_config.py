@@ -1,0 +1,12 @@
+#!/usr/bin/env python3
+import os
+TESTING = True
+ENV = 'test'
+PRESERVE_CONTEXT_ON_EXCEPTION = False
+SQLALCHEMY_DATABASE_URI = os.environ['TEST_KREOH_DATABASE_URL']
+SQLALCHEMY_TRACK_MODIFICATIONS = False
+JWT_SECRET_KEY = "-JT}!^RF5.2W8;5@)G|2R;J%U%"
+UPLOAD_FOLDER = os.environ['TEST_KREOH_UPLOAD_FOLDER']
+ALLOWED_EXTENSIONS = {'ico'}
+EMAIL = 'fareed.idris@gmail.com'
+PASSWORD = 'testing123'
