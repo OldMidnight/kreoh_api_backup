@@ -4,14 +4,10 @@ from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
 from time import sleep
 
-from flask import Blueprint, request, jsonify, Response, send_from_directory, current_app, send_from_directory
-from flask_jwt_extended import jwt_required, get_jwt_identity, jwt_refresh_token_required, create_access_token
+from flask import Blueprint, request, jsonify, Response, send_from_directory, current_app
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from werkzeug.utils import secure_filename
 from API.models import Website, User
-from PySide2.QtWidgets import QApplication
-from PySide2.QtCore import Qt, QUrl, QTimer
-from PySide2.QtWebEngineWidgets import QWebEngineView, QWebEngineSettings
-import threading
 
 bp = Blueprint('uploads', __name__, url_prefix="/uploads")
 
