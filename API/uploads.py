@@ -35,7 +35,7 @@ def grab_screenshot():
   options = Options()
   options.headless = True
   print('gets here 1')
-  driver = webdriver.Chrome(executable_path=os.environ.get('GOOGLE_CHROME_BIN', 'chromedriver'), options=options)
+  driver = webdriver.Chrome(executable_path=os.environ['GOOGLE_CHROME_BIN'], options=options)
   print('gets here 2')
   driver.get('http://' + website.domain + '.localhost:3000/')
   print('gets here 3')
