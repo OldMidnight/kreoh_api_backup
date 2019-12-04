@@ -1,7 +1,8 @@
 import os
+import boto3
 from pathlib import Path
 from selenium import webdriver
-from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.chrome.options import Options
 from time import sleep
 
 from flask import Blueprint, request, jsonify, Response, send_from_directory, current_app
@@ -9,6 +10,12 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from werkzeug.utils import secure_filename
 from API.models import Website, User
 
+s3 = boto3.resource('s3',
+  aws_access_key_id=os.getenv('BUCKETEER_AWS_ACCESS_KEY_ID'),
+  aws_secret_access_key=os.getenv('BUCKETEER_AWS_SECRET_ACCESS_KEY'),
+)
+
+bucket = s3.Bucket('bucketeer-29e1dc32-7927-4cf8-b4de-d992075645e0')
 bp = Blueprint('uploads', __name__, url_prefix="/uploads")
 
 
@@ -27,10 +34,10 @@ def grab_screenshot():
     return jsonify(screenshot_saved=False, message='Website Disabled.'), 200
   options = Options()
   options.headless = True
-  driver = webdriver.Firefox(options=options)
+  driver = webdriver.Chrome(executable_path=os.getenv('GOOGLE_CHROME_BIN') options=options)
   driver.get('http://' + website.domain + '.localhost:3000/')
   sleep(1)
-  driver.get_screenshot_as_file(current_app.config['UPLOAD_FOLDER'] + website.domain + '.kreoh.com.png')
+  driver.get_screenshot_as_file('/tmp/' + website.domain + '.kreoh.com.png')
   driver.quit()
   return jsonify(screenshot_saved=True), 200
 
