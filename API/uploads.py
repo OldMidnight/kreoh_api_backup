@@ -32,14 +32,22 @@ def grab_screenshot():
     return jsonify(screenshot_saved=False, message='No such Website.'), 404
   elif not website.active:
     return jsonify(screenshot_saved=False, message='Website Disabled.'), 200
-  options = Options()
-  options.headless = True
-  options.binary_location = os.environ['GOOGLE_CHROME_SHIM']
+  # options = Options()
+  # options.headless = True
+  # options.binary_location = os.environ['GOOGLE_CHROME_SHIM']
+  # options.add_argument("--disable-gpu")
+  # options.add_argument("--no-sandbox")
+  # options.add_argument('window-size=1920x1080')
+  chromedriver_path = "/app/.chromedriver/bin/chromedriver"
+  chrome_bin = os.environ.get('GOOGLE_CHROME_BIN', "chromedriver")
+  options = webdriver.ChromeOptions()
+  options.binary_location = chrome_bin
   options.add_argument("--disable-gpu")
   options.add_argument("--no-sandbox")
+  options.add_argument('headless')
   options.add_argument('window-size=1920x1080')
   print('gets here 1')
-  driver = webdriver.Chrome(executable_path=os.environ['GOOGLE_CHROME_BIN'], options=options)
+  driver = webdriver.Chrome(executable_path=chromedriver_path, chrome_options=options)
   print('gets here 2')
   driver.get('http://' + website.domain + '.localhost:3000/')
   print('gets here 3')
