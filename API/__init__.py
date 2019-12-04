@@ -20,7 +20,14 @@ def create_app(config='dev'):
   except OSError:
     pass
   
-  CORS(app, supports_credentials=True, origins=['http://localhost:3000/*', 'http://localhost:8080', 'https?://([a-z0-9]+[.])*localhost:3000', 'https?://([a-z0-9]+[.])*localhost:8080'])
+  CORS(app, supports_credentials=True, origins=[
+    'https?://localhost:3000',
+    'https?://localhost:8080',
+    'https?://([a-z0-9]+[.])*localhost:3000',
+    'https?://([a-z0-9]+[.])*localhost:8080',
+    'https?://kreoh-client.herokuapp.com',
+    'https?://([a-z0-9]+[.])*kreoh-client.herokuapp.com'
+  ])
   # https?://([a-z0-9]+[.])*sub[12]domain[.]com
   jwt = JWTManager(app)
 
