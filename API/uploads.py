@@ -59,14 +59,15 @@ def grab_screenshot():
 @bp.route('/screenshot/<path:filename>', methods=('GET',))
 def display_screenshot(filename):
   try:
-    screenshot = bucket.download_fileobj(filename)
+    screenshot = BytesIO()
+    bucket.download_fileobj(filename, screenshot)
   except botocore.exceptions.ClientError as e:
     if e.response['Error']['Code'] == "404":
       return jsonify(screenshot_saved=False, message='No such Image.'), 404
     else:
       return jsonify(screenshot_saved=False, message='An Error has occured.'), 404
   return send_file(
-    BytesIO(screenshot),
+    screenshot,
     mimetype='image/png',
     as_attachment=True,
     attachment_filename='%s' % filename
@@ -87,9 +88,9 @@ def save_favicon():
     favicon.save(os.path.join(current_app.config['UPLOAD_FOLDER'], favicon_name))
     return jsonify(msg='File Uploaded'), 201
 
-@bp.route('/favicon/<filename>', methods=('GET',))
-def get_favicon(filename):
-  return send_from_directory(current_app.config['UPLOAD_FOLDER'], filename)
+# @bp.route('/favicon/<filename>', methods=('GET',))
+# def get_favicon(filename):
+#   return send_from_directory(current_app.config['UPLOAD_FOLDER'], filename)
 
 @bp.route('/favicon/delete', methods=('POST',))
 @jwt_required
