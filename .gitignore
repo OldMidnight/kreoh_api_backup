@@ -3,3 +3,4 @@
 /migrations
 /*.egg-info
 /API/__pycache__
+/tests/__pycache__

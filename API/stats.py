@@ -71,32 +71,6 @@ def fetch_weekly():
     time_difference[2] = str(int(float(time_difference[2]))) + ' seconds ago'
     last_visitor_time = ' '.join(time_difference)
 
-    # i = current_time.hour
-    # labels.append(i)
-
-
-    # first_label = labels[0]
-    # i = first_label
-    # while i != 0:
-    #     i -= 1
-    #     labels.append(i)
-
-    # i = 23
-    # while i != first_label:
-    #     labels.append(i)
-    #     i -= 1
-
-    # labels.reverse()
-
-    # for hour in labels:
-    #     values.append(len(data[str(hour)]))
-
-    # for label in labels:
-    #     if label % 3 == 0:
-    #         value_labels.append(data_labels[str(label)])
-    #     else:
-    #         value_labels.append(' ')
-
     i = day
     labels.append(i)
 

@@ -1,8 +1,16 @@
 import json
 
-def test_site_activation(app, user_1_auth_tokens):
+def test_site_activation(app, user_1_auth_tokens, site_props):
   ''' Ensure website activates '''
   with app.test_client() as client:
+    client.post(
+      '/create/register_site',
+      data=json.dumps(dict(
+        site_props=site_props
+      )),
+      content_type='application/json',
+      headers={'Authorization': 'Bearer ' + user_1_auth_tokens['access_token']}
+    )
     response = client.post(
       '/helper/site_config/site_activation',
       headers={'Authorization': 'Bearer ' + user_1_auth_tokens['access_token']}
