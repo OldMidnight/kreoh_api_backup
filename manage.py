@@ -8,7 +8,7 @@ from flask_script import Manager
 from API import create_app
 from API.models import db
 
-app = create_app()
+app = create_app(os.environ['APP_ENV'])
 db.init_app(app)
 
 migrate = Migrate(app, db)
