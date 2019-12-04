@@ -34,7 +34,7 @@ def grab_screenshot():
     return jsonify(screenshot_saved=False, message='Website Disabled.'), 200
   options = Options()
   options.headless = True
-  driver = webdriver.Chrome(executable_path=os.getenv('GOOGLE_CHROME_BIN') options=options)
+  driver = webdriver.Chrome(executable_path=os.getenv('GOOGLE_CHROME_BIN'), options=options)
   driver.get('http://' + website.domain + '.localhost:3000/')
   sleep(1)
   driver.get_screenshot_as_file('/tmp/' + website.domain + '.kreoh.com.png')
