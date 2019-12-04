@@ -57,13 +57,13 @@ def fetch_weekly():
             data['6'].append(stat.visit_date_time)
 
     temp_day = day
-    print('1')
-    while not data[str(temp_day)]:
-        print('1.1')
-        if temp_day == 0:
-            temp_day = 6
-        else:
-            temp_day = temp_day - 1
+    # print('1')
+    # while not data[str(temp_day)]:
+    #     print('1.1')
+    #     if temp_day == 0:
+    #         temp_day = 6
+    #     else:
+    #         temp_day = temp_day - 1
     print('2')
     last_visitor_time = data[str(temp_day)][-1]
 
