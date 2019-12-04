@@ -34,6 +34,10 @@ def grab_screenshot():
     return jsonify(screenshot_saved=False, message='Website Disabled.'), 200
   options = Options()
   options.headless = True
+  options.binary_location = os.environ['GOOGLE_CHROME_SHIM']
+  options.add_argument("--disable-gpu")
+  options.add_argument("--no-sandbox")
+  options.add_argument('window-size=1920x1080')
   print('gets here 1')
   driver = webdriver.Chrome(executable_path=os.environ['GOOGLE_CHROME_BIN'], options=options)
   print('gets here 2')
@@ -47,9 +51,9 @@ def grab_screenshot():
 
 @bp.route('/screenshot/<path:filename>', methods=('GET',))
 def display_screenshot(filename):
-  screenshot = Path(current_app.config['UPLOAD_FOLDER'] + filename)
+  screenshot = Path('/tmp/' + filename)
   if screenshot.is_file():
-    return send_from_directory(current_app.config['UPLOAD_FOLDER'], filename, as_attachment=True)
+    return send_from_directory('/tmp/', filename, as_attachment=True)
   else:
     return jsonify(error="No Screenshot Found!")
 
