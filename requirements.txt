@@ -8,3 +8,4 @@ pytest
 Flask-JWT-Extended
 selenium
 gunicorn
+psycopg2-binary
