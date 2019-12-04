@@ -6,7 +6,7 @@ from API import create_app, db
 
 @pytest.fixture(scope='session')
 def app():
-  test_app = create_app(test_config=True)
+  test_app = create_app('test')
   with test_app.app_context():   
     # alternative pattern to app.app_context().push()
     # all commands indented under 'with' are run in the app context 

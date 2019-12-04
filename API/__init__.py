@@ -6,12 +6,14 @@ from flask_jwt_extended import JWTManager
 from API import site_creation, auth, helpers, uploads, stats
 from API.models import db
 
-def create_app(test_config=False):
+def create_app(config='dev'):
   app = Flask(__name__, instance_relative_config=True)
-  if not test_config:
-    app.config.from_pyfile('config.py')
-  else:
+  if config == 'dev':
+    app.config.from_pyfile('dev_config.py')
+  elif config == 'test':
     app.config.from_pyfile('test_config.py')
+  elif config == 'prod':
+    app.config.from_pyfile('prod_config.py')
 
   try:
     os.makedirs(app.instance_path)
