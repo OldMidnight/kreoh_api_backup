@@ -1,0 +1,8 @@
+MANIFEST.in
+setup.py
+API.egg-info/PKG-INFO
+API.egg-info/SOURCES.txt
+API.egg-info/dependency_links.txt
+API.egg-info/not-zip-safe
+API.egg-info/requires.txt
+API.egg-info/top_level.txt
