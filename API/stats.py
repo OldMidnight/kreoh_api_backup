@@ -57,11 +57,14 @@ def fetch_weekly():
             data['6'].append(stat.visit_date_time)
 
     temp_day = day
+    print('1')
     while not data[str(temp_day)]:
+        print('1.1')
         if temp_day == 0:
             temp_day = 6
         else:
             temp_day = temp_day - 1
+    print('2')
     last_visitor_time = data[str(temp_day)][-1]
 
     time_difference = str(current_time - last_visitor_time)
@@ -76,18 +79,20 @@ def fetch_weekly():
 
     first_label = labels[0]
     i = first_label
-    while i != 0:
+    print('3')
+    while i >= 0:
+        print('3.1')
         i -= 1
         labels.append(i)
 
     i = 6
-    while i != first_label:
+    print('4')
+    while i >= first_label:
+        print('4.1')
         labels.append(i)
         i -= 1
-    print(day)
-    print(labels)
+
     labels.reverse()
-    print(labels)   
     
     for day in labels:
         values.append(len(data[str(day)]))

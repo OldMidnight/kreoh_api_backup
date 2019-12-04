@@ -1,11 +1,13 @@
 import os
+from io import BytesIO
 import boto3
+import botocore
 from pathlib import Path
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from time import sleep
 
-from flask import Blueprint, request, jsonify, Response, send_from_directory, current_app
+from flask import Blueprint, request, jsonify, Response, send_file, current_app
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from werkzeug.utils import secure_filename
 from API.models import Website, User
@@ -46,24 +48,36 @@ def grab_screenshot():
   options.add_argument("--no-sandbox")
   options.add_argument('headless')
   options.add_argument('window-size=1920x1080')
-  print('gets here 1')
   driver = webdriver.Chrome(executable_path=chromedriver_path, chrome_options=options)
-  print('gets here 2')
   driver.get('http://' + website.domain + '.localhost:3000/')
-  print('gets here 3')
   sleep(1)
-  driver.get_screenshot_as_file('/tmp/' + website.domain + '.kreoh.com.png')
-  print('gets here 4')
+  screenshot = driver.get_screenshot_as_png()
+  bucket.upload_fileobj(screenshot, website.domain + '.kreoh.com.png')
   driver.quit()
   return jsonify(screenshot_saved=True), 200
 
 @bp.route('/screenshot/<path:filename>', methods=('GET',))
+@jwt_required
 def display_screenshot(filename):
-  screenshot = Path('/tmp/' + filename)
-  if screenshot.is_file():
-    return send_from_directory('/tmp/', filename, as_attachment=True)
-  else:
-    return jsonify(error="No Screenshot Found!")
+  user_id = get_jwt_identity()
+  website = Website.query.filter_by(user_id=user_id).first()
+  if website is None:
+    return jsonify(screenshot_saved=False, message='No such Website.'), 404
+  elif not website.active:
+    return jsonify(screenshot_saved=False, message='Website Disabled.'), 200
+  try:
+    screenshot = bucket.download_fileobj(website.domain + '.kreoh.com.png')
+  except botocore.exceptions.ClientError as e:
+    if e.response['Error']['Code'] == "404":
+      return jsonify(screenshot_saved=False, message='No such Image.'), 404
+    else:
+      return jsonify(screenshot_saved=False, message='An Error has occured.'), 404
+  return send_file(
+    BytesIO(screenshot),
+    mimetype='image/png',
+    as_attachment=True,
+    attachment_filename='%s' % filename
+  )
 
 @bp.route('/favicon/set', methods=('POST', ))
 @jwt_required
