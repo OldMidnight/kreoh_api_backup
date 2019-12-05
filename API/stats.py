@@ -19,6 +19,7 @@ def add_record():
 @bp.route('/fetch_weekly', methods=('GET',))
 @jwt_required
 def fetch_weekly():
+    ''' Fetch weekly stats '''
     current_time = datetime.utcnow()
     day = current_time.weekday()
     labels = []
@@ -40,6 +41,7 @@ def fetch_weekly():
 
     data_labels = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN']
 
+    # append visits for specific days in data
     for stat in stats:
         if stat.visit_date_time.weekday() == 0:
             data['0'].append(stat.visit_date_time)
@@ -57,38 +59,36 @@ def fetch_weekly():
             data['6'].append(stat.visit_date_time)
 
     temp_day = day
-    # print('1')
-    # while not data[str(temp_day)]:
-    #     print('1.1')
-    #     if temp_day == 0:
-    #         temp_day = 6
-    #     else:
-    #         temp_day = temp_day - 1
-    print('2')
-    last_visitor_time = data[str(temp_day)][-1]
+    if len(data[str(temp_day)) == 0:
+        temp_day -= 1
+        while not data[str(temp_day)] and temp_day != day:
+            if temp_day == 0:
+                temp_day = 6
+            else:
+                temp_day -= 1
+    if len(data[str(temp_day)) == 0:
+        last_visitor_time = 'No Visitors This Week.'
+    else:
+        last_visitor_time = data[str(temp_day)][-1]
 
-    time_difference = str(current_time - last_visitor_time)
-    time_difference = time_difference.split(':')
-    time_difference[0] = time_difference[0] + ' hours,'
-    time_difference[1] = time_difference[1] + ' minutes and'
-    time_difference[2] = str(int(float(time_difference[2]))) + ' seconds ago'
-    last_visitor_time = ' '.join(time_difference)
+        time_difference = str(current_time - last_visitor_time)
+        time_difference = time_difference.split(':')
+        time_difference[0] = time_difference[0] + ' hours,'
+        time_difference[1] = time_difference[1] + ' minutes and'
+        time_difference[2] = str(int(float(time_difference[2]))) + ' seconds ago'
+        last_visitor_time = ' '.join(time_difference)
 
     i = day
     labels.append(i)
 
     first_label = labels[0]
     i = first_label
-    print('3')
     while i >= 0:
-        print('3.1')
         i -= 1
         labels.append(i)
 
     i = 6
-    print('4')
     while i >= first_label:
-        print('4.1')
         labels.append(i)
         i -= 1
 
