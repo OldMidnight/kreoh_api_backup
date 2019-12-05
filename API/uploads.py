@@ -64,6 +64,7 @@ def display_screenshot(filename):
   try:
     screenshot = BytesIO()
     bucket.download_fileobj(filename, screenshot)
+    print('sdafs', screenshot)
   except botocore.exceptions.ClientError as e:
     if e.response['Error']['Code'] == "404":
       return jsonify(screenshot_saved=False, message='No such Image.'), 404
