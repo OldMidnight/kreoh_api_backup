@@ -74,6 +74,8 @@ def display_screenshot(filename):
   return send_file(
     screenshot,
     mimetype='image/png',
+    as_attachment=True,
+    attachment_filename='%s' % filename
   )
 
 @bp.route('/favicon/set', methods=('POST', ))
