@@ -111,7 +111,8 @@ def fetch_weekly():
             highest_val = val
     if not data[highest_val]:
         highest = 'No visitors this week.'
-    highest = str(len(data[highest_val])) + ' visitors - ' + data[highest_val][-1].strftime('%A')
+    else:
+        highest = str(len(data[highest_val])) + ' visitors - ' + data[highest_val][-1].strftime('%A')
 
     return jsonify(values=values, labels=value_labels, last_visitor_time=last_visitor_time, avg=avg, highest=highest), 200
 

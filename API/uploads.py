@@ -70,6 +70,7 @@ def display_screenshot(filename):
       return jsonify(screenshot_saved=False, message='No such Image.'), 404
     else:
       return jsonify(screenshot_saved=False, message='An Error has occured.'), 404
+  screenshot.seek(0)
   return send_file(
     screenshot,
     mimetype='image/png',
