@@ -59,15 +59,15 @@ def fetch_weekly():
             data['6'].append(stat.visit_date_time)
 
     temp_day = day
-    if len(data[str(temp_day)]) == 0:
+    if not data[str(temp_day)]:
         temp_day -= 1
         while not data[str(temp_day)] and temp_day != day:
             if temp_day == 0:
                 temp_day = 6
             else:
                 temp_day -= 1
-    if len(data[str(temp_day)]) == 0:
-        last_visitor_time = 'No Visitors This Week.'
+    if not data[str(temp_day)]:
+        last_visitor_time = 'No visitors this week.'
     else:
         last_visitor_time = data[str(temp_day)][-1]
 
@@ -109,7 +109,8 @@ def fetch_weekly():
     for val in data:
         if len(data[val]) >= len(data[highest_val]):
             highest_val = val
-
+    if not data[highest_val]:
+        highest = 'No visitors this week.'
     highest = str(len(data[highest_val])) + ' visitors - ' + data[highest_val][-1].strftime('%A')
 
     return jsonify(values=values, labels=value_labels, last_visitor_time=last_visitor_time, avg=avg, highest=highest), 200
