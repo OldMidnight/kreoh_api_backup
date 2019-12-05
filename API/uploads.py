@@ -52,6 +52,7 @@ def grab_screenshot():
   driver.get('http://' + website.domain + '.localhost:3000/')
   sleep(1)
   screenshot = driver.get_screenshot_as_png()
+  screenshot = BytesIO(screenshot)
   bucket.upload_fileobj(screenshot, website.domain + '.kreoh.com.png')
   driver.quit()
   return jsonify(screenshot_saved=True), 200
