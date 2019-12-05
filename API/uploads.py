@@ -58,6 +58,8 @@ def grab_screenshot():
 
 @bp.route('/screenshot/<path:filename>', methods=('GET',))
 def display_screenshot(filename):
+  for f in bucket.objects.all():
+    print(f.key)
   try:
     screenshot = BytesIO()
     bucket.download_fileobj(filename, screenshot)
