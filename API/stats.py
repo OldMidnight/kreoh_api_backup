@@ -81,14 +81,13 @@ def fetch_weekly():
     i = day
     labels.append(i)
 
-    first_label = labels[0]
-    i = first_label
-    while i >= 0:
+    i = day
+    while i > 0:
         i -= 1
         labels.append(i)
 
     i = 6
-    while i >= first_label:
+    while i > day:
         labels.append(i)
         i -= 1
 

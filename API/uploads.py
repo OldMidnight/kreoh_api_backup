@@ -7,7 +7,7 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from time import sleep
 
-from flask import Blueprint, request, jsonify, Response, make_response, current_app
+from flask import Blueprint, request, jsonify, Response, send_file, current_app
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from werkzeug.utils import secure_filename
 from API.models import Website, User
@@ -69,11 +69,10 @@ def display_screenshot(filename):
       return jsonify(screenshot_saved=False, message='No such Image.'), 404
     else:
       return jsonify(screenshot_saved=False, message='An Error has occured.'), 404
-  response = make_response(screenshot)
-  response.headers.set('Content-Type', 'image/png')
-  response.headers.set(
-      'Content-Disposition', 'attachment', filename='%s' % filename)
-  return response
+  return send_file(
+    screenshot,
+    mimetype='image/png',
+  )
 
 @bp.route('/favicon/set', methods=('POST', ))
 @jwt_required
