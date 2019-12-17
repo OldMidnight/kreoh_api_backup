@@ -61,13 +61,13 @@ def fetch_weekly():
     temp_day = day
     if not data[str(temp_day)]:
         temp_day -= 1
-        while not data[str(temp_day)] and temp_day != day:
+        while temp_day > -1 and not data[str(temp_day)] and temp_day != day:
             if temp_day == 0:
                 temp_day = 6
             else:
                 temp_day -= 1
-    if not data[str(temp_day)]:
-        last_visitor_time = 'No visitors this week.'
+    if temp_day == -1 or not data[str(temp_day)]:
+        last_visitor_time = 'Kinda quiet round here...'
     else:
         last_visitor_time = data[str(temp_day)][-1]
 
@@ -110,7 +110,7 @@ def fetch_weekly():
         if len(data[val]) >= len(data[highest_val]):
             highest_val = val
     if not data[highest_val]:
-        highest = 'No visitors this week.'
+        highest = 'Kinda quiet round here...'
     else:
         highest = str(len(data[highest_val])) + ' visitors - ' + data[highest_val][-1].strftime('%A')
 
@@ -208,7 +208,7 @@ def fetch_hourly():
             highest_val = val
 
     if not data[highest_val]:
-        highest = 'No visitors yet'
+        highest = 'Kinda quiet round here...'
     else:
         highest = str(len(data[highest_val])) + ' visitors - ' + str(data[highest_val][-1].strftime('%I %p'))
 
@@ -277,7 +277,7 @@ def fetch_monthly():
             highest_val = val
 
     if not data[highest_val]:
-        highest = 'No visitors yet'
+        highest = 'Kinda quiet round here...'
     else:
         highest = str(len(data[highest_val])) + ' visitors - ' + str(data[highest_val][-1].strftime('%B'))
 

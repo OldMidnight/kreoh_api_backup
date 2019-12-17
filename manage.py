@@ -8,7 +8,7 @@ from flask_script import Manager
 from API import create_app
 from API.models import db
 
-app = create_app(os.environ['APP_ENV'])
+app = create_app()
 db.init_app(app)
 
 migrate = Migrate(app, db)
@@ -28,7 +28,7 @@ def test():
   if not os.path.exists(test_upload_folder):
     os.makedirs(test_upload_folder)
 
-  pytest.main(['-s', 'tests/test_auth.py', 'tests/test_site_creation.py', 'tests/test_helpers.py', 'tests/test_uploads.py'])
+  pytest.main(['-s', 'tests/test_auth.py', 'tests/test_site_creation.py', 'tests/test_helpers.py', 'tests/test_uploads.py', 'tests/test_user.py'])
 
   shutil.rmtree(test_upload_folder, ignore_errors=True)
 

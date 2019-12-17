@@ -8,8 +8,8 @@ db = SQLAlchemy()
 
 class Website(db.Model):
   w_id = db.Column(db.Integer, primary_key=True)
-  user_id = db.Column(db.Integer, db.ForeignKey('user.u_id'), nullable=False, unique=True)
-  domain = db.Column(db.String, db.ForeignKey('user.domain'), nullable=False, unique=True)
+  user_id = db.Column(db.Integer, db.ForeignKey('user.u_id', ondelete='CASCADE'), nullable=False, unique=True)
+  domain = db.Column(db.String, db.ForeignKey('user.domain', ondelete='CASCADE'), nullable=False, unique=True)
   activation_date = db.Column(db.DateTime)
   active = db.Column(db.Boolean, nullable=False, default=False)
   site_props = db.Column(db.String)
@@ -34,7 +34,7 @@ class Website(db.Model):
 
 class WebsiteStats(db.Model):
   record_id = db.Column(db.Integer, primary_key=True)
-  domain = db.Column(db.String, nullable=False)
+  domain = db.Column(db.String, db.ForeignKey('user.domain', ondelete='CASCADE'), nullable=False)
   visit_date_time = db.Column(db.DateTime, nullable=False)
 
   def add(self):
@@ -54,6 +54,18 @@ class User(db.Model):
 
   def add(self):
     db.session.add(self)
+    db.session.commit()
+
+  def update_email(self, new_email):
+    self.email = new_email
+    db.session.commit()
+
+  def update_password(self, new_password):
+    self.password = new_password
+    db.session.commit()
+
+  def delete(self):
+    db.session.delete(self)
     db.session.commit()
 
   @classmethod

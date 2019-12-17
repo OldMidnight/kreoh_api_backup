@@ -18,7 +18,7 @@ def validate_domain():
     if user is None:
         return jsonify(validated=True), 200
     else:
-        return jsonify(validated=False), 200
+        return jsonify(validated=False), 409
 
 @bp.route('/register_site', methods=('POST',))
 @jwt_required

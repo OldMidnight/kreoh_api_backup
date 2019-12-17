@@ -1,6 +1,6 @@
 import os
 from io import BytesIO
-import boto3
+from .s3 import bucket
 import botocore
 from pathlib import Path
 from selenium import webdriver
@@ -12,12 +12,6 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from werkzeug.utils import secure_filename
 from API.models import Website, User
 
-s3 = boto3.resource('s3',
-  aws_access_key_id=os.getenv('BUCKETEER_AWS_ACCESS_KEY_ID'),
-  aws_secret_access_key=os.getenv('BUCKETEER_AWS_SECRET_ACCESS_KEY'),
-)
-
-bucket = s3.Bucket('bucketeer-29e1dc32-7927-4cf8-b4de-d992075645e0')
 bp = Blueprint('uploads', __name__, url_prefix="/uploads")
 
 
@@ -34,16 +28,14 @@ def grab_screenshot():
     return jsonify(screenshot_saved=False, message='No such Website.'), 404
   elif not website.active:
     return jsonify(screenshot_saved=False, message='Website Disabled.'), 200
-  # options = Options()
-  # options.headless = True
-  # options.binary_location = os.environ['GOOGLE_CHROME_SHIM']
-  # options.add_argument("--disable-gpu")
-  # options.add_argument("--no-sandbox")
-  # options.add_argument('window-size=1920x1080')
-  chromedriver_path = "/app/.chromedriver/bin/chromedriver"
-  chrome_bin = os.environ.get('GOOGLE_CHROME_BIN', "chromedriver")
+  if current_app.config['DEBUG']:
+    chromedriver_path = '/home/fareed/Documents/Gecko/chromedriver'
+  else:
+    chromedriver_path = "/app/.chromedriver/bin/chromedriver"
   options = webdriver.ChromeOptions()
-  options.binary_location = chrome_bin
+  if not current_app.config['DEBUG']:
+    chrome_bin = os.environ.get('GOOGLE_CHROME_BIN', "chromedriver")
+    options.binary_location = chrome_bin
   options.add_argument("--disable-gpu")
   options.add_argument("--no-sandbox")
   options.add_argument('headless')
@@ -59,12 +51,9 @@ def grab_screenshot():
 
 @bp.route('/screenshot/<path:filename>', methods=('GET',))
 def display_screenshot(filename):
-  for f in bucket.objects.all():
-    print(f.key)
   try:
     screenshot = BytesIO()
     bucket.download_fileobj(filename, screenshot)
-    print('sdafs', screenshot)
   except botocore.exceptions.ClientError as e:
     if e.response['Error']['Code'] == "404":
       return jsonify(screenshot_saved=False, message='No such Image.'), 404
@@ -90,20 +79,33 @@ def save_favicon():
     return jsonify(msg='No Selected File.'), 200
   if favicon and allowed_file(favicon.filename):
     favicon_name = secure_filename(str(user_id) + '_' + domain + '_' + favicon.filename)
-    favicon.save(os.path.join(current_app.config['UPLOAD_FOLDER'], favicon_name))
+    bucket.upload_fileobj(favicon, favicon_name)
     return jsonify(msg='File Uploaded'), 201
 
-# @bp.route('/favicon/<filename>', methods=('GET',))
-# def get_favicon(filename):
-#   return send_from_directory(current_app.config['UPLOAD_FOLDER'], filename)
+@bp.route('/favicon/<filename>', methods=('GET',))
+def get_favicon(filename):
+  try:
+    favicon = BytesIO()
+    bucket.download_fileobj(filename, favicon)
+  except botocore.exceptions.ClientError as e:
+    if e.response['Error']['Code'] == "404":
+      return jsonify(screenshot_saved=False, message='No such Icon.'), 404
+    else:
+      return jsonify(screenshot_saved=False, message='An Error has occured.'), 404
+  favicon.seek(0)
+  return send_file(
+    favicon,
+    mimetype='image/*',
+    as_attachment=True,
+    attachment_filename='%s' % filename
+  )
 
 @bp.route('/favicon/delete', methods=('POST',))
 @jwt_required
 def delete_favicon():
-  filename = request.get_json()['filename']
-  favicon = Path(current_app.config['UPLOAD_FOLDER'] + filename)
+  favicon = request.get_json()['filename']
   try:
-    favicon.unlink()
-  except FileNotFoundError:
+    bucket.delete_key(favicon)
+  except:
     pass
   return jsonify(), 200

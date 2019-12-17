@@ -4,6 +4,7 @@ flask-SQLAlchemy
 psycopg2-binary
 Flask-Migrate
 Flask-Script
+Flask-Mail
 pytest
 Flask-JWT-Extended
 selenium

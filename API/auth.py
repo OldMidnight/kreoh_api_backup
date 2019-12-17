@@ -47,7 +47,7 @@ def login():
         refresh_token = create_refresh_token(user.u_id)
         return jsonify(access_token=access_token, refresh_token=refresh_token), 200
     else:
-        return jsonify(message="Invalid Email or Password."), 400
+        return jsonify(message="Invalid Email or Password."), 401
 
 @bp.route('/user', methods=('GET',))
 @jwt_required

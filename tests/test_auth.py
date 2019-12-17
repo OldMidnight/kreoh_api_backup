@@ -23,17 +23,21 @@ def register(client, f_name, s_name, email, password, domain):
     content_type='application/json'
   )
 
+def test_config(app):
+  ''' Test correct config applied '''
+  assert app.config['TESTING'] is True
+
 def test_add_user(app):
   ''' ensure a new user can be added '''
   with app.test_client() as client:
     response = register(client, 'fareed', 'idris', app.config['EMAIL'], app.config['PASSWORD'], 'fareed')
     data = json.loads(response.data.decode())
     assert response.status_code == 201
-    assert 'fareed.idris@gmail.com user created.' in data['message']
+    assert 'fareedidris20@gmail.com user created.' in data['message']
     response = register(client, 'fareed', 'idris', app.config['EMAIL'] + 'x', app.config['PASSWORD'], 'fareedx')
     data = json.loads(response.data.decode())
     assert response.status_code == 201
-    assert 'fareed.idris@gmail.comx user created.' in data['message']
+    assert 'fareedidris20@gmail.comx user created.' in data['message']
 
 def test_not_add_user(app):
   ''' Ensure user cannot be added with wrong inputs '''
@@ -71,7 +75,7 @@ def test_not_login(app):
   with app.test_client() as client:
     response = login(client, app.config['EMAIL'] + 'x', app.config['PASSWORD'] + 'x')
     data = json.loads(response.data.decode())
-    assert response.status_code == 400
+    assert response.status_code == 401
     assert 'Invalid Email or Password.' in data['message']
 
 def test_get_user(app, user_1_auth_tokens):

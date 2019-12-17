@@ -3,7 +3,8 @@ from datetime import timedelta
 from pathlib import Path
 from flask import Blueprint, request, jsonify, Response, current_app
 from flask_jwt_extended import jwt_required, get_jwt_identity, jwt_refresh_token_required, create_access_token
-from API.models import Website, User
+from .models import Website, User
+from .s3 import bucket
 
 bp = Blueprint('helpers', __name__, url_prefix="/helper")
 
@@ -74,16 +75,6 @@ def get_auth_site_config():
     return jsonify(site_config=site_config), 200
 
 
-@bp.route('/get_site', methods=('POST',))
-@jwt_required
-def get_site():
-  user_id = get_jwt_identity()
-  website = Website.query.filter_by(user_id=user_id).first()
-  if website:
-    return jsonify(available=True), 200
-  else:
-    return jsonify(available=False), 200
-
 @bp.route('/delete_site', methods=('POST',))
 @jwt_required
 def delete_site():
@@ -94,9 +85,9 @@ def delete_site():
   else:
     website.delete()
     website = Website.query.filter_by(domain=domain).first()
-    screenshot = Path(current_app.config['UPLOAD_FOLDER'] + domain + '.kreoh.com.png')
+    screenshot = domain + '.kreoh.com.png'
     try:
-      screenshot.unlink()
-    except FileNotFoundError:
+      bucket.delete_key(screenshot)
+    except:
       pass
     return jsonify(message="Website deleted."), 200

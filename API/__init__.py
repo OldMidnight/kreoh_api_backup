@@ -2,23 +2,13 @@
 import os
 from flask import Flask
 from flask_cors import CORS
-from flask_jwt_extended import JWTManager
-from API import site_creation, auth, helpers, uploads, stats
-from API.models import db
+from .extensions import jwt, mail
+from API import site_creation, auth, helpers, uploads, stats, user
+from .models import db
 
-def create_app(config='dev'):
-  app = Flask(__name__, instance_relative_config=True)
-  if config == 'dev':
-    app.config.from_pyfile('dev_config.py')
-  elif config == 'test':
-    app.config.from_pyfile('test_config.py')
-  elif config == 'prod':
-    app.config.from_pyfile('prod_config.py')
-
-  try:
-    os.makedirs(app.instance_path)
-  except OSError:
-    pass
+def create_app(config='DevConfig'):
+  app = Flask(__name__)
+  app.config.from_object('API.config.' + config)
   
   CORS(app, supports_credentials=True, origins=[
     'https?://localhost:3000',
@@ -28,18 +18,13 @@ def create_app(config='dev'):
     'https?://kreoh-client.herokuapp.com',
     'https?://([a-z0-9]+[.])*kreoh-client.herokuapp.com'
   ])
-  # https?://([a-z0-9]+[.])*sub[12]domain[.]com
-  jwt = JWTManager(app)
 
   with app.app_context():
     db.init_app(app)
     print('Initialized Database')
 
-  app.register_blueprint(site_creation.bp)
-  app.register_blueprint(auth.bp)
-  app.register_blueprint(helpers.bp)
-  app.register_blueprint(uploads.bp)
-  app.register_blueprint(stats.bp)
+  register_extensions(app)
+  register_endpoints(app)
 
   @app.teardown_request
   def teardown_request(exception):
@@ -48,3 +33,15 @@ def create_app(config='dev'):
     db.session.remove()
 
   return app
+
+def register_extensions(app):
+  jwt.init_app(app)
+  mail.init_app(app)
+
+def register_endpoints(app):
+  app.register_blueprint(site_creation.bp)
+  app.register_blueprint(auth.bp)
+  app.register_blueprint(helpers.bp)
+  app.register_blueprint(uploads.bp)
+  app.register_blueprint(stats.bp)
+  app.register_blueprint(user.bp)
