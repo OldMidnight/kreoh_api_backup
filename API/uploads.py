@@ -41,11 +41,17 @@ def grab_screenshot():
   options.add_argument('headless')
   options.add_argument('window-size=1920x1080')
   driver = webdriver.Chrome(executable_path=chromedriver_path, chrome_options=options)
-  driver.get('http://' + website.domain + '.localhost:3000/')
-  sleep(1)
-  screenshot = driver.get_screenshot_as_png()
-  screenshot = BytesIO(screenshot)
-  bucket.upload_fileobj(screenshot, website.domain + '.kreoh.com.png')
+  pages = {
+    'home': '/',
+    'projects': '/projects',
+    'resume': '/resume'
+  }
+  for page in pages:
+    driver.get('http://' + website.domain + '.localhost:3001' + pages[page])
+    sleep(1)
+    screenshot = driver.get_screenshot_as_png()
+    screenshot = BytesIO(screenshot)
+    bucket.upload_fileobj(screenshot, page + '.' + website.domain + '.kreoh.com.png')
   driver.quit()
   return jsonify(screenshot_saved=True), 200
 
