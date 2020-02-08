@@ -1,3 +1,8 @@
 *.log
 *.pyc
 .env
+migrations/
+API.egg-info/
+.vscode/
+.pytest_cache/
+.pylintrc

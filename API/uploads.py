@@ -1,6 +1,7 @@
 import os
 from io import BytesIO
-from .s3 import bucket
+from .s3 import s3, FileStore
+from .screenshot import ScreenshotClient
 import botocore
 from pathlib import Path
 from selenium import webdriver
@@ -13,6 +14,8 @@ from werkzeug.utils import secure_filename
 from API.models import Website, User
 
 bp = Blueprint('uploads', __name__, url_prefix="/uploads")
+bucket = s3.Bucket('bucketeer-29e1dc32-7927-4cf8-b4de-d992075645e0')
+store = FileStore(bucket)
 
 
 def allowed_file(filename):
@@ -22,44 +25,32 @@ def allowed_file(filename):
 @bp.route('/screenshot/grab', methods=('GET',))
 @jwt_required
 def grab_screenshot():
+  screenshot_client = ScreenshotClient()
   user_id = get_jwt_identity()
   website = Website.query.filter_by(user_id=user_id).first()
   if website is None:
     return jsonify(screenshot_saved=False, message='No such Website.'), 404
-  elif not website.active:
-    return jsonify(screenshot_saved=False, message='Website Disabled.'), 200
-  if current_app.config['DEBUG']:
-    chromedriver_path = '/home/fareed/Documents/Gecko/chromedriver'
-  else:
-    chromedriver_path = "/app/.chromedriver/bin/chromedriver"
-  options = webdriver.ChromeOptions()
-  if not current_app.config['DEBUG']:
-    chrome_bin = os.environ.get('GOOGLE_CHROME_BIN', "chromedriver")
-    options.binary_location = chrome_bin
-  options.add_argument("--disable-gpu")
-  options.add_argument("--no-sandbox")
-  options.add_argument('headless')
-  options.add_argument('window-size=1920x1080')
-  driver = webdriver.Chrome(executable_path=chromedriver_path, chrome_options=options)
   pages = {
     'home': '/',
     'projects': '/projects',
     'resume': '/resume'
   }
+  disable_after = False
+  if not website.active:
+    website.screenshot_activation()
+    disable_after = True
   for page in pages:
-    driver.get('http://' + website.domain + '.localhost:3001' + pages[page])
-    sleep(1)
-    screenshot = driver.get_screenshot_as_png()
-    screenshot = BytesIO(screenshot)
-    bucket.upload_fileobj(screenshot, page + '.' + website.domain + '.kreoh.com.png')
-  driver.quit()
+    screenshot = screenshot_client.get_screenshot('http://' + website.domain + '.localhost:3001' + pages[page])
+    store.upload(screenshot, website.domain + '/' + page + '.kreoh.com.png')
+  screenshot_client.driver.quit()
+  if disable_after:
+    website.screenshot_deactivation()
   return jsonify(screenshot_saved=True), 200
 
 @bp.route('/screenshot/<path:filename>', methods=('GET',))
 def display_screenshot(filename):
   try:
-    screenshot = BytesIO()
-    bucket.download_fileobj(filename, screenshot)
+    screenshot = store.download(filename)
   except botocore.exceptions.ClientError as e:
     if e.response['Error']['Code'] == "404":
       return jsonify(screenshot_saved=False, message='No such Image.'), 404
@@ -73,45 +64,85 @@ def display_screenshot(filename):
     attachment_filename='%s' % filename
   )
 
-@bp.route('/favicon/set', methods=('POST', ))
-@jwt_required
-def save_favicon():
-  user_id = get_jwt_identity()
-  domain = User.query.filter_by(u_id=user_id).first().domain
-  if 'favicon' not in request.files:
-    return jsonify(msg="No File Sent."), 200
-  favicon = request.files['favicon']
-  if favicon.filename == '':
-    return jsonify(msg='No Selected File.'), 200
-  if favicon and allowed_file(favicon.filename):
-    favicon_name = secure_filename(str(user_id) + '_' + domain + '_' + favicon.filename)
-    bucket.upload_fileobj(favicon, favicon_name)
-    return jsonify(msg='File Uploaded'), 201
+# @bp.route('/favicon', methods=('POST',))
+# @jwt_required
+# def save_favicon():
+#   user_id = get_jwt_identity()
+#   domain = User.query.filter_by(id=user_id).first().domain
+#   if 'favicon' not in request.files:
+#     return jsonify(msg="No File Sent."), 200
+#   favicon = request.files['favicon']
+#   if favicon.filename == '':
+#     return jsonify(msg='No Selected File.'), 200
+#   if favicon and allowed_file(favicon.filename):
+#     favicon_name = secure_filename(str(user_id) + '_' + domain + '_' + favicon.filename)
+#     store.upload(favicon, favicon_name)
+#     return jsonify(msg='File Uploaded'), 201
 
-@bp.route('/favicon/<filename>', methods=('GET',))
-def get_favicon(filename):
+# @bp.route('/favicon/<filename>', methods=('GET',))
+# def get_favicon(filename):
+#   try:
+#     favicon = store.download(filename)
+#   except botocore.exceptions.ClientError as e:
+#     if e.response['Error']['Code'] == "404":
+#       return jsonify(screenshot_saved=False, message='No such Icon.'), 404
+#     else:
+#       return jsonify(screenshot_saved=False, message='An Error has occured.'), 404
+#   favicon.seek(0)
+#   return send_file(
+#     favicon,
+#     mimetype='image/*',
+#     as_attachment=True,
+#     attachment_filename='%s' % filename
+#   )
+
+# @bp.route('/favicon/delete', methods=('POST',))
+# @jwt_required
+# def delete_favicon():
+#   favicon = request.get_json()['filename']
+#   try:
+#     store.delete_file(favicon)
+#   except Exception as e:
+#     raise Exception(e)
+#   return jsonify(), 200
+
+# USER IMAGE UPLOADS
+
+@bp.route('/images/<domain>/<filename>', methods=('POST',))
+@jwt_required
+def upload_image(domain, filename):
+  if 'image' not in request.files:
+    return jsonify(msg="No File Sent."), 200
+  image = request.files['image']
+  if image.filename == '':
+    return jsonify(msg='No Selected File.'), 200
+  if image:
+    store.upload(image, domain + '/' + filename)
+    return jsonify(msg='Image Uploaded'), 201
+  return jsonify(error="image Not Uploaded"), 403
+
+@bp.route('/images/<domain>/<filename>', methods=('GET',))
+def get_image(domain, filename):
   try:
-    favicon = BytesIO()
-    bucket.download_fileobj(filename, favicon)
+    image = store.download(domain + '/' + filename)
   except botocore.exceptions.ClientError as e:
     if e.response['Error']['Code'] == "404":
       return jsonify(screenshot_saved=False, message='No such Icon.'), 404
     else:
       return jsonify(screenshot_saved=False, message='An Error has occured.'), 404
-  favicon.seek(0)
+  image.seek(0)
   return send_file(
-    favicon,
+    image,
     mimetype='image/*',
     as_attachment=True,
-    attachment_filename='%s' % filename
+    attachment_filename='%s' % domain + '/' + filename
   )
 
-@bp.route('/favicon/delete', methods=('POST',))
+@bp.route('/images/<domain>/<filename>/delete', methods=('POST',))
 @jwt_required
-def delete_favicon():
-  favicon = request.get_json()['filename']
+def delete_image(domain, filename):
   try:
-    bucket.delete_key(favicon)
-  except:
-    pass
+    store.delete_file(domain + '/' + filename)
+  except Exception as e:
+    return jsonify(error='No such file'), 200
   return jsonify(), 200

@@ -5,16 +5,123 @@ from datetime import datetime, timedelta
 
 bp = Blueprint('stats', __name__, url_prefix='/stats')
 
+@bp.route('/record_cta_inter', methods=('POST',))
+def record_interaction():
+    data = request.get_json()
+    domain = data['domain']
+    date_time = data['date_time']
+    stats = WebsiteStats(domain=domain, cta_inter=True, visit_date_time=date_time)
+    stats.add()
+    return jsonify(), 200
+
 @bp.route('/add_record', methods=('POST',))
 def add_record():
     data = request.get_json()
     domain = data['domain']
     date_time = data['date_time']
-    print(data)
     stats = WebsiteStats(domain=domain, visit_date_time=date_time)
     stats.add()
-    return jsonify(error=False), 200
+    return jsonify(), 200
 
+@bp.route('/fetch_cta_inter', methods=('GET',))
+@jwt_required
+def fetch_cta_inter():
+    ''' Fetch Call To Action Interaction stats '''
+    current_time = datetime.utcnow()
+    day = current_time.weekday()
+    labels = []
+    values = []
+    value_labels = []
+
+    user_id = get_jwt_identity()
+    user_domain = User.query.filter_by(id=user_id).first().domain
+    stats = WebsiteStats.query.filter(WebsiteStats.domain == user_domain, WebsiteStats.visit_date_time > (current_time - timedelta(days=6)), WebsiteStats.cta_inter).all()
+    data = {
+        '0': [],
+        '1': [],
+        '2': [],
+        '3': [],
+        '4': [],
+        '5': [],
+        '6': [],
+    }
+
+    data_labels = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN']
+
+    # append visits for specific days in data
+    for stat in stats:
+        if stat.visit_date_time.weekday() == 0:
+            data['0'].append(stat.visit_date_time)
+        elif stat.visit_date_time.weekday() == 1:
+            data['1'].append(stat.visit_date_time)
+        elif stat.visit_date_time.weekday() == 2:
+            data['2'].append(stat.visit_date_time)
+        elif stat.visit_date_time.weekday() == 3:
+            data['3'].append(stat.visit_date_time)
+        elif stat.visit_date_time.weekday() == 4:
+            data['4'].append(stat.visit_date_time)
+        elif stat.visit_date_time.weekday() == 5:
+            data['5'].append(stat.visit_date_time)
+        elif stat.visit_date_time.weekday() == 6:
+            data['6'].append(stat.visit_date_time)
+
+    temp_day = day
+    if not data[str(temp_day)]:
+        temp_day -= 1
+        while temp_day > -1 and not data[str(temp_day)] and temp_day != day:
+            if temp_day == 0:
+                temp_day = 6
+            else:
+                temp_day -= 1
+    if temp_day == -1 or not data[str(temp_day)]:
+        last_visitor_time = 'Kinda quiet round here...'
+    else:
+        last_visitor_time = data[str(temp_day)][-1]
+
+        time_difference = str(current_time - last_visitor_time)
+        time_difference = time_difference.split(':')
+        time_difference[0] = time_difference[0] + ' hours,'
+        time_difference[1] = time_difference[1] + ' minutes and'
+        time_difference[2] = str(int(float(time_difference[2]))) + ' seconds ago'
+        last_visitor_time = ' '.join(time_difference)
+
+    i = day
+    labels.append(i)
+
+    i = day
+    while i > 0:
+        i -= 1
+        labels.append(i)
+
+    i = 6
+    while i > day:
+        labels.append(i)
+        i -= 1
+
+    labels.reverse()
+    
+    for day in labels:
+        values.append(len(data[str(day)]))
+
+    for label in labels:
+        value_labels.append(data_labels[label])
+
+    avg = 0
+    for value in values:
+        avg = avg + value
+
+    avg = avg // 7
+
+    highest_val = '0'
+    for val in data:
+        if len(data[val]) >= len(data[highest_val]):
+            highest_val = val
+    if not data[highest_val]:
+        highest = 'Kinda quiet round here...'
+    else:
+        highest = str(len(data[highest_val])) + ' interactions - ' + data[highest_val][-1].strftime('%A')
+
+    return jsonify(values=values, labels=value_labels, last_visitor_time=last_visitor_time, avg=avg, highest=highest), 200
 
 @bp.route('/fetch_weekly', methods=('GET',))
 @jwt_required
@@ -27,7 +134,7 @@ def fetch_weekly():
     value_labels = []
 
     user_id = get_jwt_identity()
-    user_domain = User.query.filter_by(u_id=user_id).first().domain
+    user_domain = User.query.filter_by(id=user_id).first().domain
     stats = WebsiteStats.query.filter(WebsiteStats.domain == user_domain, WebsiteStats.visit_date_time > (current_time - timedelta(days=6))).all()
     data = {
         '0': [],
@@ -124,7 +231,7 @@ def fetch_hourly():
     value_labels = []
     values = []
     user_id = get_jwt_identity()
-    user_domain = User.query.filter_by(u_id=user_id).first().domain
+    user_domain = User.query.filter_by(id=user_id).first().domain
     stats = WebsiteStats.query.filter(WebsiteStats.domain == user_domain, WebsiteStats.visit_date_time > (current_time - timedelta(hours=23))).all()
 
     data = {
@@ -210,7 +317,7 @@ def fetch_hourly():
     if not data[highest_val]:
         highest = 'Kinda quiet round here...'
     else:
-        highest = str(len(data[highest_val])) + ' visitors - ' + str(data[highest_val][-1].strftime('%I %p'))
+        highest = str(len(data[highest_val])) + ' students - ' + str(data[highest_val][-1].strftime('%I %p'))
 
     return jsonify(values=values, labels=value_labels, avg=avg, highest=highest), 200
 
@@ -222,7 +329,7 @@ def fetch_monthly():
     value_labels = []
     values = []
     user_id = get_jwt_identity()
-    user_domain = User.query.filter_by(u_id=user_id).first().domain
+    user_domain = User.query.filter_by(id=user_id).first().domain
     stats = WebsiteStats.query.filter(WebsiteStats.domain == user_domain, WebsiteStats.visit_date_time > (current_time - timedelta(days=364))).all()
     data = {
         '1': [],

@@ -24,7 +24,7 @@ def validate_domain():
 @jwt_required
 def register_website():
     user_id = get_jwt_identity()
-    user = User.query.filter_by(u_id=user_id).first()
+    user = User.query.filter_by(id=user_id).first()
     data = request.get_json()['site_props']
     site_props = json.loads(data)
     site_props = json.dumps(site_props)
@@ -33,7 +33,7 @@ def register_website():
       website.add()
     except IntegrityError:
       return jsonify(message='Website already created.'), 409
-    website.site_activation()
+    # website.site_activation()
     if Website.query.filter_by(user_id=user_id).first() is None:
       return jsonify(message="Webite could not be registered."), 406
     else:
