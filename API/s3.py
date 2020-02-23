@@ -12,19 +12,19 @@ class FileStore:
     def __init__(self, bucket):
         self.bucket = bucket
 
-    def upload(self, inputStream, fileName):
+    def upload(self, input_stream, file_name):
         try:
-            self.bucket.upload_fileobj(inputStream, fileName)
+            self.bucket.upload_fileobj(input_stream, file_name)
         except botocore.exceptions.ClientError as e:
             raise Exception('Could not upload file', e)
 
-    def download(self, fileName):
-        outputStream = BytesIO()
-        self.bucket.download_fileobj(fileName, outputStream)
-        return outputStream
+    def download(self, file_name):
+        output_stream = BytesIO()
+        self.bucket.download_fileobj(file_name, output_stream)
+        return output_stream
 
 
-    def delete_file(self, key):
+    def deleteFile(self, key):
         try:
             s3.Object(self.bucket.name, key).delete()
         except botocore.exceptions.ClientError as e:

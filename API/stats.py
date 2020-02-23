@@ -106,11 +106,11 @@ def fetch_cta_inter():
     for label in labels:
         value_labels.append(data_labels[label])
 
-    avg = 0
+    total = 0
     for value in values:
-        avg = avg + value
+        total = total + value
 
-    avg = avg // 7
+    # avg = avg // 7
 
     highest_val = '0'
     for val in data:
@@ -121,7 +121,7 @@ def fetch_cta_inter():
     else:
         highest = str(len(data[highest_val])) + ' interactions - ' + data[highest_val][-1].strftime('%A')
 
-    return jsonify(values=values, labels=value_labels, last_visitor_time=last_visitor_time, avg=avg, highest=highest), 200
+    return jsonify(values=values, labels=value_labels, last_visitor_time=last_visitor_time, total=total, highest=highest), 200
 
 @bp.route('/fetch_weekly', methods=('GET',))
 @jwt_required
@@ -206,11 +206,11 @@ def fetch_weekly():
     for label in labels:
         value_labels.append(data_labels[label])
 
-    avg = 0
+    total = 0
     for value in values:
-        avg = avg + value
+        total = total + value
 
-    avg = avg // 7
+    # avg = avg // 7
 
     highest_val = '0'
     for val in data:
@@ -221,7 +221,7 @@ def fetch_weekly():
     else:
         highest = str(len(data[highest_val])) + ' visitors - ' + data[highest_val][-1].strftime('%A')
 
-    return jsonify(values=values, labels=value_labels, last_visitor_time=last_visitor_time, avg=avg, highest=highest), 200
+    return jsonify(values=values, labels=value_labels, last_visitor_time=last_visitor_time, total=total, highest=highest), 200
 
 @bp.route('/fetch_hourly', methods=('GET',))
 @jwt_required
@@ -303,11 +303,11 @@ def fetch_hourly():
         else:
             value_labels.append(' ')
 
-    avg = 0
+    total = 0
     for value in values:
-        avg = avg + value
+        total = total + value
 
-    avg = avg // 8
+    # avg = avg // 8
 
     highest_val = '0'
     for val in data:
@@ -319,7 +319,7 @@ def fetch_hourly():
     else:
         highest = str(len(data[highest_val])) + ' students - ' + str(data[highest_val][-1].strftime('%I %p'))
 
-    return jsonify(values=values, labels=value_labels, avg=avg, highest=highest), 200
+    return jsonify(values=values, labels=value_labels, total=total, highest=highest), 200
 
 @bp.route('/fetch_monthly', methods=('GET',))
 @jwt_required
@@ -372,11 +372,11 @@ def fetch_monthly():
     for label in labels:
         value_labels.append(data_labels[label - 1])
 
-    avg = 0
+    total = 0
     for value in values:
-        avg = avg + value
+        total = total + value
 
-    avg = avg // 12
+    # avg = avg // 12
 
     highest_val = '1'
     for val in data:
@@ -388,4 +388,4 @@ def fetch_monthly():
     else:
         highest = str(len(data[highest_val])) + ' visitors - ' + str(data[highest_val][-1].strftime('%B'))
 
-    return jsonify(values=values, labels=value_labels, avg=avg, highest=highest), 200
+    return jsonify(values=values, labels=value_labels, total=total, highest=highest), 200

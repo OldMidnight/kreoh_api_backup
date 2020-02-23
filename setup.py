@@ -9,6 +9,16 @@ setup(
         zip_safe=False,
         install_requires=[
             'flask',
-            'flask-cors'
+            'flask-cors',
+            'flask-SQLAlchemy',
+            'psycopg2-binary',
+            'Flask-Migrate',
+            'Flask-Script',
+            'Flask-Mail',
+            'pytest',
+            'Flask-JWT-Extended',
+            'selenium',
+            'gunicorn',
+            'boto3'
         ],
     )

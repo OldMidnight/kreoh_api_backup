@@ -68,6 +68,6 @@ def get_user():
     user = User.query.filter_by(id=user_id).first()
     website = Website.query.filter_by(user_id=user.id).first()
     if website is None:
-      return jsonify(id=user.id, f_name=user.f_name, s_name=user.s_name, domain=user.domain, email=user.email, account_type=user.account_type, site_created=False, site_active=False, email_confirmed=user.email_confirmed, skip_tutorial=user.skip_tutorial), 200
+      return jsonify(id=user.id, f_name=user.f_name, s_name=user.s_name, domain=user.domain, email=user.email, account_type=user.account_type, site_created=False, site_active=False, email_confirmed=user.email_confirmed, skip_tutorial=user.skip_tutorial, dark_mode=user.dark_mode), 200
     else:
-      return jsonify(id=user.id, f_name=user.f_name, s_name=user.s_name, domain=user.domain, email=user.email, account_type=user.account_type, site_created=True, site_active=website.active, email_confirmed=user.email_confirmed, skip_tutorial=user.skip_tutorial), 200
+      return jsonify(id=user.id, f_name=user.f_name, s_name=user.s_name, domain=user.domain, email=user.email, account_type=user.account_type, site_created=True, site_active=website.active, email_confirmed=user.email_confirmed, skip_tutorial=user.skip_tutorial, dark_mode=user.dark_mode), 200

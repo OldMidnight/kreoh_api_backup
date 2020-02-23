@@ -3,7 +3,7 @@ import os
 from flask import Flask
 from flask_cors import CORS
 from API.extensions import jwt, mail
-from API import site_creation, auth, helpers, uploads, stats, user, mailer
+from API import site_creation, auth, helpers, uploads, stats, user, mailer, support
 from API.models import db
 
 def create_app(config='DevConfig'):
@@ -47,3 +47,4 @@ def register_endpoints(app):
   app.register_blueprint(stats.bp)
   app.register_blueprint(user.bp)
   app.register_blueprint(mailer.bp)
+  app.register_blueprint(support.bp)

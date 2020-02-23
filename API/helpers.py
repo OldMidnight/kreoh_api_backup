@@ -6,7 +6,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity, jwt_refresh_token
 from .models import Website, User, WebsiteStats
 from .s3 import s3, FileStore
 
-bp = Blueprint('helpers', __name__, url_prefix="/helper")
+bp = Blueprint('helpers', __name__, url_prefix="/helpers")
 bucket = s3.Bucket('bucketeer-29e1dc32-7927-4cf8-b4de-d992075645e0')
 store = FileStore(bucket)
 
@@ -27,16 +27,16 @@ def site_activation():
   website.site_activation()
   return jsonify(active=website.active), 200
 
-@bp.route('/get_site_active', methods=('GET',))
-@jwt_required
-def get_site_active():
-  user_id = get_jwt_identity()
-  user = User.query.filter_by(id=user_id).first()
-  website = Website.query.filter_by(user_id=user.id).first()
-  if website is None:
-    return jsonify(site_parked=False, site_available=False)
-  else:
-    return jsonify(site_parked=not(website.active), site_available=True)
+# @bp.route('/get_site_active', methods=('GET',))
+# @jwt_required
+# def get_site_active():
+#   user_id = get_jwt_identity()
+#   user = User.query.filter_by(id=user_id).first()
+#   website = Website.query.filter_by(user_id=user.id).first()
+#   if website is None:
+#     return jsonify(site_parked=False, site_available=False)
+#   else:
+#     return jsonify(site_parked=not(website.active), site_available=True)
 
 @bp.route('/check_domain', methods=('POST',))
 def check_domain():
@@ -76,6 +76,14 @@ def get_auth_site_config():
     site_config = json.loads(website.site_props)
     return jsonify(site_config=site_config), 200
 
+
+@bp.route('/toggle_dark_mode', methods=('PUT',))
+@jwt_required
+def toggle_dark_mode():
+  user_id = get_jwt_identity()
+  user = User.query.filter_by(id=user_id).first()
+  user.toggle_dark_mode()
+  return jsonify(), 204
 
 @bp.route('/delete_site', methods=('POST',))
 @jwt_required

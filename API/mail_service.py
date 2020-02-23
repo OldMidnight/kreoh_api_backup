@@ -15,6 +15,19 @@ class MailService():
       self.sender = sender
       self.user = User.query.filter_by(id=user_id).first()
 
+  def send_support_message(self, subject, recipients, body, ticket_id):
+    mail.send_message(subject, sender=self.sender, recipients=recipients, body=body)
+    msg = Message(user_id=self.user.id, support_ticket_id=ticket_id, sender_name=self.sender[0], sender_address=self.sender[1], subject=subject, body=body)
+    msg.add()
+
+  def send_support_confirmation_message(self):
+    subject = 'Support Ticket Recieved'
+    body = 'Hi {f_name},\nThis is just a confirmation message to say we got your message! All you have to do now is wait and we will get back to you ASAP!\n\nHave a wonderful day,\nKreoh Support'.format(f_name=self.user.f_name)
+    mail.send_message(subject=subject, sender=self.sender, recipients=[self.user.email], body=body)
+    if self.user:
+      msg = Message(user_id=self.user.id, sender_name=self.sender[0], sender_address=self.sender[1], subject=subject, body=body)
+      msg.add()
+
   def send_message(self, subject, recipients, body):
     mail.send_message(subject, sender=self.sender, recipients=recipients, body=body)
     if self.user:
@@ -25,7 +38,7 @@ class MailService():
     token = generate_confirmation_token(self.user.email)
     confirm_url = 'http://localhost:3000/u/confirm_email/' + token
     subject = 'Welcome To Kreoh!'
-    body = 'Hi {f_name},\n\nMy name is Fareed, founder of Kreoh. Allow me use this as an opportunity to welcome you to the Kreoh Community!\n\nIn order for you to fully access all the features of Kreoh, simply follow the link below:\n\n{confirm_url}\n\nIf you need any help setting up simply reply to this email and we\'ll get right back to you.\nIn fact, we\'ll be happy to answer any questions you may have.\n\nAgain, thank you for joining us and welcome aboard!\n\n Best of luck,\nFareed'.format(f_name=self.user.f_name, confirm_url=confirm_url)
+    body = 'Hi {f_name},\n\nMy name is Fareed, founder of Kreoh. Allow me use this as an opportunity to welcome you to the Kreoh Community!\n\nIn order for you to fully access all the features of Kreoh, simply follow the link below:\n\n{confirm_url}\n\nIf you need any help setting up simply reply to this email and I will get right back to you.\nIn fact, I would be happy to answer any questions you may have.\n\nAgain, thank you for joining us and welcome aboard!\n\n Best of luck,\nFareed'.format(f_name=self.user.f_name, confirm_url=confirm_url)
 
     mail.send_message(subject=subject, sender=self.sender, recipients=[self.user.email], body=body)
     if self.user:

@@ -1,2 +1,12 @@
+Flask-JWT-Extended
+Flask-Mail
+Flask-Migrate
+Flask-Script
+boto3
 flask
+flask-SQLAlchemy
 flask-cors
+gunicorn
+psycopg2-binary
+pytest
+selenium

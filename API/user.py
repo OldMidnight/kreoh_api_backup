@@ -43,7 +43,7 @@ def confirm_email(token):
       return jsonify(message='Please check your email!'), 406
   user = User.query.filter_by(id=user_id).first()
   user.update_email(email)
-  return jsonify(message='Email Changed.'), 202
+  return jsonify(message='Email Verified.'), 202
 
 
 @bp.route('/password_change', methods=('POST',))
@@ -91,12 +91,24 @@ def get_status():
   raw_messages = Message.query.filter_by(user_id=user_id).all()
   messages = []
   for message in raw_messages:
-    messages.append({
-      'sender': message.sender_name,
-      'address': message.sender_address,
-      'subject': message.subject,
-      'body': message.body,
-      'read': message.read
-    })
+    if message.support_ticket_id is None:
+      messages.append({
+        'id': message.id,
+        'sender': message.sender_name,
+        'address': message.sender_address,
+        'subject': message.subject,
+        'body': message.body,
+        'read': message.read,
+        'time_sent': message.time_sent
+      })
 
   return jsonify(email_confirmed=user.email_confirmed, messages=messages), 200
+
+@bp.route('/msg/read', methods=('PUT',))
+@jwt_required
+def set_read():
+  data = request.get_json()
+  message_id = data['id']
+  message = Message.query.filter_by(id=message_id).first()
+  message.set_read()
+  return jsonify(), 200
