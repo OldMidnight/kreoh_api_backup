@@ -43,7 +43,7 @@ def confirm_email(token):
       return jsonify(message='Please check your email!'), 406
   user = User.query.filter_by(id=user_id).first()
   user.update_email(email)
-  return jsonify(message='Email Verified.'), 202
+  return jsonify(message='Email Verified.'), 201
 
 
 @bp.route('/password_change', methods=('POST',))
