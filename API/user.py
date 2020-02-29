@@ -111,4 +111,4 @@ def set_read():
   message_id = data['id']
   message = Message.query.filter_by(id=message_id).first()
   message.set_read()
-  return jsonify(), 200
+  return jsonify(), 201
