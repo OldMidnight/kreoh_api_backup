@@ -27,7 +27,7 @@ class TestConfig(Config):
 
 class ProdConfig(Config):
   DEBUG = False
-  SQLALCHEMY_DATABASE_URI = os.environ['KREOH_DATABASE_URL']
+  SQLALCHEMY_DATABASE_URI = os.environ['DATABASE_URL']
 
 
 class DevConfig(Config):

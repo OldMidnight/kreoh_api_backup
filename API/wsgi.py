@@ -1,3 +1,3 @@
 from . import create_app
 
-application = create_app('ProdConfig')
+application = create_app()

@@ -6,9 +6,12 @@ from API.extensions import jwt, mail
 from API import site_creation, auth, helpers, uploads, stats, user, mailer, support
 from API.models import db
 
-def create_app(config='DevConfig'):
+def create_app():
   app = Flask(__name__)
-  app.config.from_object('API.config.' + config)
+  if os.environ['FLASK_ENV'] == "development":
+    app.config.from_object('API.config.DevConfig')
+  else:
+    app.config.from_object('API.config.ProdConfig')
   
   CORS(app, supports_credentials=True, origins=[
     'https?://localhost:3000',
