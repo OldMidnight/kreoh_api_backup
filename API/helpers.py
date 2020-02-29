@@ -41,6 +41,7 @@ def site_activation():
 @bp.route('/check_domain', methods=('POST',))
 def check_domain():
   domain = request.get_json()['domain']
+  print(domain)
   user = User.query.filter_by(domain=domain).first()
   if user:
     website = Website.query.filter_by(user_id=user.id).first()
