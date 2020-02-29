@@ -13,7 +13,7 @@ def create_app():
   else:
     app.config.from_object('API.config.ProdConfig')
   
-  CORS(app, supports_credentials=True, send_wildcard=True)
+  CORS(app, send_wildcard=True)
 
   with app.app_context():
     db.init_app(app)
