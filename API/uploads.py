@@ -79,29 +79,29 @@ def grab_screenshot():
         website.screenshot_deactivation()
     return jsonify(screenshot_saved=True), 200
 
-# USER IMAGE UPLOADS
+# USER FILE UPLOADS
 
-@bp.route('/images/<domain>/<filename>', methods=('POST',))
+@bp.route('/user-content/<domain>/<filename>', methods=('POST',))
 @jwt_required
-def upload_image(domain, filename):
+def upload_file(domain, filename):
     user_id = get_jwt_identity()
     user = User.query.filter_by(id=user_id).first()
     # website = Website.query.filter_by(user_id=user_id).first()
-    if 'image' not in request.files:
-        return jsonify(msg="No File Sent."), 200
+    if 'upload' not in request.files:
+        return jsonify(msg="No File Sent."), 404
     upload_filename = filename.split('.')
     # print('UPLOADNAME', upload_filename)
-    image = request.files['image']
-    image.seek(0, 2)
-    size = image.tell()
-    image.seek(0)
-    if image.filename == '':
-        return jsonify(msg='No Selected File.'), 200
-    if image:
-        store.upload(image, domain + '/' + filename)
+    user_file = request.files['upload']
+    user_file.seek(0, 2)
+    size = user_file.tell()
+    user_file.seek(0)
+    if user_file.filename == '':
+        return jsonify(msg='No Selected File.'), 404
+    if user_file:
+        store.upload(user_file, domain + '/' + filename)
         upload = Upload.query.filter_by(label=domain + '/' + upload_filename[0]).first()
         if upload is None:
-            upload = Upload(url=domain + '/' + filename, type=image.content_type, size=size, name=image.filename, ext=upload_filename[1], label=domain + '/' + upload_filename[0], user_id=user.id)
+            upload = Upload(url=domain + '/' + filename, type=user_file.content_type, size=size, name=user_file.filename, ext=upload_filename[1], label=domain + '/' + upload_filename[0], user_id=user.id)
             upload.add()
             user.updateStorageSpace('-', size)
         else:
@@ -114,42 +114,37 @@ def upload_image(domain, filename):
                 'url': domain + '/' + filename,
                 'ext': upload_filename[1],
                 'size': size,
-                'type': image.content_type,
-                'name': image.filename
+                'type': user_file.content_type,
+                'name': user_file.filename
             })
-        return jsonify(msg='Image Uploaded'), 201
-    return jsonify(error="image Not Uploaded"), 403
+        return jsonify(msg='File Uploaded'), 201
+    return jsonify(error="File Not Uploaded"), 403
 
-@bp.route('/images/<domain>/<filename>', methods=('GET',))
-def get_image(domain, filename):
+@bp.route('/user-content/<domain>/<filename>', methods=('GET',))
+def get_file(domain, filename):
     upload = Upload.query.filter_by(url=domain + '/' + filename).first()
     try:
-        image = store.download(domain + '/' + filename)
+        user_upload = store.download(domain + '/' + filename)
     except botocore.exceptions.ClientError as e:
         if e.response['Error']['Code'] == "404":
-            return jsonify(screenshot_saved=False, message='No such Icon.'), 404
+            return jsonify(screenshot_saved=False, message='No such File.'), 404
         else:
             return jsonify(screenshot_saved=False, message='An Error has occured.'), 404
-    image.seek(0)
-    # TODO Make server return files with correct file extension
+    user_upload.seek(0)
     if upload is None:
         return send_file(
-            image,
-            mimetype='image/*',
-            as_attachment=True,
+            user_upload, 
             attachment_filename='%s' % domain + '/' + filename
         )
     else:
         return send_file(
-            image,
-            mimetype='image/*',
-            as_attachment=True,
+            user_upload,
             attachment_filename='%s' % upload.name
         )
 
-@bp.route('/images/<domain>/<filename>', methods=('DELETE',))
+@bp.route('/user-content/<domain>/<filename>', methods=('DELETE',))
 @jwt_required
-def delete_image(domain, filename):
+def delete_file(domain, filename):
     upload = Upload.query.filter_by(url=domain + '/' + filename).first()
     if upload is None:
         return jsonify(error='No such file'), 404
