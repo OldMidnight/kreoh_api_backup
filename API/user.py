@@ -81,7 +81,7 @@ def delete_account():
   user.delete()
   user = User.query.filter_by(id=user_id).first()
   if user is None:
-    return jsonify(message='Account Deleted.'), 200
+    return jsonify(message='Account Deleted.'), 201
 
 @bp.route('/status', methods=('GET',))
 @jwt_required
