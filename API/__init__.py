@@ -21,6 +21,7 @@ def create_app():
     'https?://([a-z0-9]+[.])*localhost:8080',
     'https?://kreoh-client.herokuapp.com',
     'https?://www.kreoh.com',
+    'https?://([a-z0-9]+[.])*kreoh.com'
     'https?://([a-z0-9]+[.])*kreoh-client.herokuapp.com'
   ])
 
