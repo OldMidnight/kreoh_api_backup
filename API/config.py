@@ -26,12 +26,12 @@ class TestConfig(Config):
   PASSWORD = 'testing123'
 
 class ProdConfig(Config):
-  DEBUG = True
-  SQLALCHEMY_DATABASE_URI = 'postgres://toyjdeesqbehqg:1a78ff2ddd9b89462844e536bf0273e5a40f1bbfd7f585d2a9cf2dfe528a5c59@ec2-54-247-125-38.eu-west-1.compute.amazonaws.com:5432/dbp5a02r4eun2u'
+  DEBUG = False
+  SQLALCHEMY_DATABASE_URI = os.environ['KREOH_DATABASE_URL']
 
 
 class DevConfig(Config):
   DEBUG = True
-  SQLALCHEMY_DATABASE_URI = 'postgres://toyjdeesqbehqg:1a78ff2ddd9b89462844e536bf0273e5a40f1bbfd7f585d2a9cf2dfe528a5c59@ec2-54-247-125-38.eu-west-1.compute.amazonaws.com:5432/dbp5a02r4eun2u'
+  SQLALCHEMY_DATABASE_URI = os.environ['KREOH_DATABASE_URL']
   # 'postgres://abvwtdgewzsxby:fae82356c2b1e51029b371780c3056ddd8358e831ccbfd576796f3610ea9b96f@ec2-54-247-82-14.eu-west-1.compute.amazonaws.com:5432/deg66mpubkbe89'
   # os.environ['KREOH_DATABASE_URL']
