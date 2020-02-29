@@ -13,17 +13,7 @@ def create_app():
   else:
     app.config.from_object('API.config.ProdConfig')
   
-  CORS(app, supports_credentials=True, origins=[
-    'https?://localhost:3000',
-    'https?://localhost:8080',
-    'https?://([a-z0-9]+[.])*localhost:3000',
-    'https?://([a-z0-9]+[.])*localhost:3001',
-    'https?://([a-z0-9]+[.])*localhost:8080',
-    'https?://kreoh-client.herokuapp.com',
-    'http?://www.kreoh.com',
-    'http?://([a-z0-9]+[.])*kreoh.com'
-    'https?://([a-z0-9]+[.])*kreoh-client.herokuapp.com'
-  ])
+  CORS(app, supports_credentials=True, origins=['.*?'])
 
   with app.app_context():
     db.init_app(app)
