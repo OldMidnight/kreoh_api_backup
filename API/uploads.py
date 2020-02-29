@@ -72,7 +72,7 @@ def grab_screenshot():
         website.screenshot_activation()
         disable_after = True
     for page in pages:
-        screenshot = screenshot_client.get_screenshot('http://' + website.domain + '.kreoh.com/' + pages[page])
+        screenshot = screenshot_client.get_screenshot('http://' + website.domain + '.kreoh.com' + pages[page])
         store.upload(screenshot, website.domain + '/' + page + '.kreoh.com.png')
     screenshot_client.driver.quit()
     if disable_after:
