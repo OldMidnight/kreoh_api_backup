@@ -32,7 +32,7 @@ def register():
   user = User.query.filter_by(domain=domain).first()
   if user is None:
     users = User.query.all()
-    if len(users) < 0:
+    if len(users) < 25:
       user = User(domain=domain, email=email, f_name=f_name, s_name=s_name, password=generate_password_hash(password), account_type=4)
       user.add()
 
