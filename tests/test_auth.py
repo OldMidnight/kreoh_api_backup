@@ -75,7 +75,7 @@ def test_not_login(app):
   with app.test_client() as client:
     response = login(client, app.config['EMAIL'] + 'x', app.config['PASSWORD'] + 'x')
     data = json.loads(response.data.decode())
-    assert response.status_code == 401
+    assert response.status_code == 406
     assert 'Invalid Email or Password.' in data['message']
 
 def test_get_user(app, user_1_auth_tokens):

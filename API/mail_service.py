@@ -13,7 +13,8 @@ class MailService():
   def __init__(self, app, sender, user_id):
     with app.app_context():
       self.sender = sender
-      self.user = User.query.filter_by(id=user_id).first()
+      if user_id is not None:
+        self.user = User.query.filter_by(id=user_id).first()
 
   def send_support_message(self, subject, recipients, body, ticket_id):
     mail.send_message(subject, sender=self.sender, recipients=recipients, body=body)
@@ -77,3 +78,8 @@ class MailService():
     if self.user:
       msg = Message(user_id=self.user.id, sender_name=self.sender[0], sender_address=self.sender[1], subject=subject, body=body)
       msg.add()
+  def send_mailing_list_added_message(self, email):
+    subject = 'Good to have you on board!'
+    body = 'Hey there!\n\nMy name is Fareed, creator of Kreoh and I\'m just sending this message because I\'m so hyped that you\'re as excited about the launch of Kreoh as I am! I\'ve been working on this project for almost 2 years and it awesome that it\'s almost done and that amazing people like you are waiting to use it!\n\nDon\'t worry, I won\'t send you any spam in the meantime but if you have any questions you want answering, send me a message to my email (fareed@kreoh.com) and I\'ll get back to you ASAP.\n\n Till the moment we releaase keep being awesome, keep being you because that\'s what Kreoh needs.\n\nThanks again,\nFareed\nCreator of Kreoh'
+
+    mail.send_message(subject=subject, sender=self.sender, recipients=[email], body=body)

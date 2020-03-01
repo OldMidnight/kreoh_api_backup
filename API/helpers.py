@@ -27,17 +27,6 @@ def site_activation():
   website.site_activation()
   return jsonify(active=website.active), 200
 
-# @bp.route('/get_site_active', methods=('GET',))
-# @jwt_required
-# def get_site_active():
-#   user_id = get_jwt_identity()
-#   user = User.query.filter_by(id=user_id).first()
-#   website = Website.query.filter_by(user_id=user.id).first()
-#   if website is None:
-#     return jsonify(site_parked=False, site_available=False)
-#   else:
-#     return jsonify(site_parked=not(website.active), site_available=True)
-
 @bp.route('/check_domain', methods=('POST',))
 def check_domain():
   domain = request.get_json()['domain']
@@ -96,13 +85,5 @@ def delete_site():
   else:
     website.delete()
     website = Website.query.filter_by(domain=domain).first()
-    # screenshot = domain + '.kreoh.com.png'
-    # for page in ['home', 'projects', 'resume']:
-    #   try:
-    #     store.delete_file(domain + '/' + page + '.' + screenshot)
-    #   except Exception:
-    #     raise Exception('Could not delete screenshot', domain + '/' + page + '.' + screenshot)
-    # objects = [e['Key'] for p in s3.get_paginator("list_objects_v2").paginate(Bucket='bucketeer-29e1dc32-7927-4cf8-b4de-d992075645e0', Prefix=domain) for e in p['Contents']]
-    # print(objects)
     bucket.objects.filter(Prefix=domain).delete()
     return jsonify(message="Website deleted."), 200
