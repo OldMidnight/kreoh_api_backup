@@ -10,8 +10,10 @@ def create_app():
   app = Flask(__name__)
   if os.environ['FLASK_ENV'] == "development":
     app.config.from_object('API.config.DevConfig')
+    print('Starting API with DevConfig...')
   else:
     app.config.from_object('API.config.ProdConfig')
+    print('Starting API with ProdConfig...')
   
   CORS(app, send_wildcard=True)
 

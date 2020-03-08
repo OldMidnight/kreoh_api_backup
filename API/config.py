@@ -1,4 +1,5 @@
 import os
+from datetime import timedelta
 
 class Config(object):
   SECRET_KEY = os.environ['KREOH_SECRET_KEY']
@@ -33,5 +34,4 @@ class ProdConfig(Config):
 class DevConfig(Config):
   DEBUG = True
   SQLALCHEMY_DATABASE_URI = os.environ['KREOH_DATABASE_URL']
-  # 'postgres://abvwtdgewzsxby:fae82356c2b1e51029b371780c3056ddd8358e831ccbfd576796f3610ea9b96f@ec2-54-247-82-14.eu-west-1.compute.amazonaws.com:5432/deg66mpubkbe89'
-  # os.environ['KREOH_DATABASE_URL']
+  JWT_ACCESS_TOKEN_EXPIRES = timedelta(minutes=1)

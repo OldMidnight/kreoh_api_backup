@@ -10,13 +10,6 @@ bp = Blueprint('helpers', __name__, url_prefix="/helpers")
 bucket = s3.Bucket('bucketeer-29e1dc32-7927-4cf8-b4de-d992075645e0')
 store = FileStore(bucket)
 
-@bp.route('/refresh_token', methods=('POST',))
-@jwt_refresh_token_required
-def refresh():
-  user = get_jwt_identity()
-  new_token = create_access_token(identity=user, fresh=False, expires_delta=timedelta(minutes=30))
-  return jsonify(access_token=new_token), 201
-
 @bp.route('/site_config/site_activation', methods=('POST',))
 @jwt_required
 def site_activation():
