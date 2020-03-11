@@ -40,7 +40,7 @@ def register():
       mailer = MailService(current_app, ('Fareed From Kreoh', current_app.config['MAIL_USERNAME']), user.id)
       mailer.send_welcome_message()
 
-      access_token = create_access_token(user.id, fresh=True, expires_delta=timedelta(minutes=20))
+      access_token = create_access_token(user.id, fresh=True, expires_delta=timedelta(minutes=30))
       refresh_token = create_refresh_token(user.id)
       return jsonify(access_token=access_token, refresh_token=refresh_token, message=email + ' user created.'), 201
     else:
@@ -55,7 +55,7 @@ def login():
   password = data['password']
   user = User.authenticate(email, password)
   if user:
-    access_token = create_access_token(user.id, fresh=True, expires_delta=timedelta(minutes=20))
+    access_token = create_access_token(user.id, fresh=True, expires_delta=timedelta(minutes=30))
     refresh_token = create_refresh_token(user.id)
     return jsonify(access_token=access_token, refresh_token=refresh_token), 200
   else:
@@ -79,5 +79,5 @@ def get_user():
 @jwt_refresh_token_required
 def refresh():
   user = get_jwt_identity()
-  new_token = create_access_token(identity=user, fresh=False, expires_delta=timedelta(minutes=20))
+  new_token = create_access_token(identity=user, fresh=False, expires_delta=timedelta(minutes=30))
   return jsonify(access_token=new_token), 201
