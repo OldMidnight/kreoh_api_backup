@@ -12,11 +12,14 @@ bp = Blueprint('mailer', __name__, url_prefix="/mail")
 @bp.route('/mailing_list/add', methods=('POST',))
 def add():
   email = request.get_json()['email']
-  email_to_add = MailingList(email=email)
   if MailingList.query.filter_by(email=email).first() is None:
+    email_to_add = MailingList(email=email)
     mailer = MailService(current_app, ('Fareed From Kreoh', current_app.config['MAIL_USERNAME']), None)
-    mailer.send_mailing_list_added_message(email)
+    try:
+      mailer.send_mailing_list_added_message(email)
+    except Exception as e:
+      return jsonify(error=True, message="An error occured while adding your email. Please try again later!"), 400
     email_to_add.add()
-    return jsonify(added=True, msg="Awesome! We'll send you an email to verify that you have been added!"), 201
+    return jsonify(error=False, message="Awesome! We'll send you an email to verify that you have been added!"), 201
   else:
-    return jsonify(added=False, msg="You've already been added to the Mailing List! Hold your horses, we're working as fast as we can!"), 404
+    return jsonify(error=True, message="You've already been added to the Mailing List! Hold your horses, we're working as fast as we can!"), 400

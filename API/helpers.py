@@ -16,9 +16,10 @@ def site_activation():
   user_id = get_jwt_identity()
   website = Website.query.filter_by(user_id=user_id).first()
   if website is None:
-    return jsonify(message='No website to toggle activation.'), 404
+    return jsonify(error=True, message='No website to toggle activation.'), 404
+  message = "Your website is now active!" if not website.active else "Your website has been parked!"
   website.site_activation()
-  return jsonify(active=website.active), 200
+  return jsonify(error=False, message=message), 201
 
 @bp.route('/check_domain', methods=('POST',))
 def check_domain():
@@ -74,9 +75,10 @@ def delete_site():
   domain = request.get_json()['domain']
   website = Website.query.filter_by(domain=domain).first()
   if website is None:
-    return jsonify(message="Website could not be deleted. No Such website."), 404
+    return jsonify(error=True, message="Website could not be deleted. No Such website."), 404
   else:
-    website.delete()
-    website = Website.query.filter_by(domain=domain).first()
-    bucket.objects.filter(Prefix=domain).delete()
-    return jsonify(message="Website deleted."), 200
+    try:
+      website.delete()
+    except Exception as e:
+      return jsonify(error=True, message="An error has occured. Please try again later."), 400
+    return jsonify(error=False, message="Website deleted."), 200

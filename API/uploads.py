@@ -52,32 +52,33 @@ def getUploads():
         'max_storage_space': storage_dict[user.account_type],
         'current_storage_space': user.storage_space
     }
-    return jsonify(uploads=upload_resp, storage=storage), 200
+    return jsonify(error=False, uploads=upload_resp, storage=storage), 200
 
 @bp.route('/screenshot/grab', methods=('GET',))
 @jwt_required
 def grab_screenshot():
-    screenshot_client = ScreenshotClient()
-    user_id = get_jwt_identity()
-    website = Website.query.filter_by(user_id=user_id).first()
-    if website is None:
-        return jsonify(screenshot_saved=False, message='No such Website.'), 404
-    pages = {
-      'home': '/',
-      'projects': '/projects',
-      'resume': '/resume'
-    }
-    disable_after = False
-    if not website.active:
-        website.screenshot_activation()
-        disable_after = True
-    for page in pages:
-        screenshot = screenshot_client.get_screenshot('http://' + website.domain + '.kreoh.com' + pages[page])
-        store.upload(screenshot, website.domain + '/' + page + '.kreoh.com.png')
-    screenshot_client.driver.quit()
-    if disable_after:
-        website.screenshot_deactivation()
-    return jsonify(screenshot_saved=True), 200
+    if not current_app.config['DEBUG']:
+        screenshot_client = ScreenshotClient()
+        user_id = get_jwt_identity()
+        website = Website.query.filter_by(user_id=user_id).first()
+        if website is None:
+            return jsonify(error=True, message='No such Website.'), 404
+        pages = {
+        'home': '/',
+        'projects': '/projects',
+        'resume': '/resume'
+        }
+        disable_after = False
+        if not website.active:
+            website.screenshot_activation()
+            disable_after = True
+        for page in pages:
+            screenshot = screenshot_client.get_screenshot('http://' + website.domain + '.kreoh.com' + pages[page])
+            store.upload(screenshot, website.domain + '/' + page + '.kreoh.com.png')
+        screenshot_client.driver.quit()
+        if disable_after:
+            website.screenshot_deactivation()
+    return jsonify(error=False, message='Website screenshots captured!'), 201
 
 # USER FILE UPLOADS
 
@@ -86,17 +87,15 @@ def grab_screenshot():
 def upload_file(domain, filename):
     user_id = get_jwt_identity()
     user = User.query.filter_by(id=user_id).first()
-    # website = Website.query.filter_by(user_id=user_id).first()
     if 'upload' not in request.files:
-        return jsonify(msg="No File Sent."), 404
+        return jsonify(error=True, message="No File Sent."), 400
     upload_filename = filename.split('.')
-    # print('UPLOADNAME', upload_filename)
     user_file = request.files['upload']
     user_file.seek(0, 2)
     size = user_file.tell()
     user_file.seek(0)
     if user_file.filename == '':
-        return jsonify(msg='No Selected File.'), 404
+        return jsonify(error=True, message='No Selected File.'), 400
     if user_file:
         store.upload(user_file, domain + '/' + filename)
         upload = Upload.query.filter_by(label=domain + '/' + upload_filename[0]).first()
@@ -117,40 +116,37 @@ def upload_file(domain, filename):
                 'type': user_file.content_type,
                 'name': user_file.filename
             })
-        return jsonify(msg='File Uploaded'), 201
-    return jsonify(error="File Not Uploaded"), 403
+        return jsonify(error=False, message='File Uploaded!'), 201
+    return jsonify(error=True, messgae="File Not Uploaded"), 400
 
 @bp.route('/user-content/<domain>/<filename>', methods=('GET',))
 def get_file(domain, filename):
-    upload = Upload.query.filter_by(url=domain + '/' + filename).first()
-    try:
-        user_upload = store.download(domain + '/' + filename)
-    except botocore.exceptions.ClientError as e:
-        if e.response['Error']['Code'] == "404":
-            return jsonify(screenshot_saved=False, message='No such File.'), 404
-        else:
-            return jsonify(screenshot_saved=False, message='An Error has occured.'), 404
-    user_upload.seek(0)
-    if upload is None:
-        return send_file(
-            user_upload, 
-            attachment_filename='%s' % domain + '/' + filename
-        )
+  try:
+    user_upload = store.download(domain + '/' + filename)
+  except botocore.exceptions.ClientError as e:
+    if e.response['Error']['Code'] == "404":
+      return jsonify(error=True, message='No such File.'), 404
     else:
-        return send_file(
-            user_upload,
-            attachment_filename='%s' % upload.name
-        )
+      return jsonify(error=True, message='An Error has occured.'), 404
+  user_upload.seek(0)
+  return send_file(
+    user_upload,
+    attachment_filename='%s' % domain + '/' + filename
+  )
 
 @bp.route('/user-content/<domain>/<filename>', methods=('DELETE',))
 @jwt_required
 def delete_file(domain, filename):
-    upload = Upload.query.filter_by(url=domain + '/' + filename).first()
-    if upload is None:
-        return jsonify(error='No such file'), 404
-    else:
-        try:
-            store.deleteFile(upload.url)
-        except Exception as e:
-            return jsonify(error='File not found.'), 404
-        return jsonify(), 200
+  user_id = get_jwt_identity()
+  user = User.query.filter_by(id=user_id).first()
+  upload = Upload.query.filter_by(url=domain + '/' + filename).first()
+  if upload is None:
+    return jsonify(error=True, message='No such file'), 404
+  else:
+    try:
+      store.deleteFile(upload.url)
+      upload.delete()
+      user.updateStorageSpace('+', upload.size)
+    except Exception as e:
+      return jsonify(error=True, message='File not found.'), 404
+    return jsonify(error=False, message='File Deleted!'), 200

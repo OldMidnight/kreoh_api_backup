@@ -16,6 +16,8 @@ class Config(object):
   SQLALCHEMY_TRACK_MODIFICATIONS = False
   SECURITY_CONFIRMABLE = True
   SECURITY_TRACKABLE = True
+  JWT_BLACKLIST_ENABLED = True
+  JWT_BLACKLIST_TOKEN_CHECKS = ['access', 'refresh']
 
 class TestConfig(Config):
   TESTING = True
@@ -33,5 +35,4 @@ class ProdConfig(Config):
 
 class DevConfig(Config):
   DEBUG = True
-  SQLALCHEMY_DATABASE_URI = os.environ['KREOH_DATABASE_URL']
-  JWT_ACCESS_TOKEN_EXPIRES = timedelta(minutes=1)
+  SQLALCHEMY_DATABASE_URI = os.environ['KREOH_DATABASE_URL']  

@@ -40,7 +40,7 @@ locked_domains = [
   'forums',
   'temp',
   'admin',
-
+  'internal'
 ]
 
 @bp.route('/validate_domain', methods=('POST',))
@@ -48,9 +48,9 @@ def validate_domain():
   domain = request.get_json()['domain']
   user = User.query.filter_by(domain=domain).first()
   if user is None and domain not in locked_domains:
-    return jsonify(validated=True), 200
+    return jsonify(error=False), 200
   else:
-    return jsonify(validated=False, msg="Invalid or Unavailable domain name."), 409
+    return jsonify(error=True, message='Invalid or Unavailable domain name.'), 400
 
 @bp.route('/register_site', methods=('POST',))
 @jwt_required
@@ -64,12 +64,12 @@ def register_website():
   try:
     website.add()
   except IntegrityError:
-    return jsonify(message='Website already created.'), 409
+    return jsonify(error=True, message='Website already created.'), 400
   # website.site_activation()
   if Website.query.filter_by(user_id=user_id).first() is None:
-    return jsonify(message="Webite could not be registered."), 406
+    return jsonify(error=True, message='Webite could not be registered.'), 400
   else:
-    return jsonify(message="Website Created."), 200
+    return jsonify(error=False, message='Website Created!'), 201
 
 @bp.route('/update_site', methods=('POST',))
 @jwt_required
@@ -80,6 +80,6 @@ def update_website():
   new_site_props = json.dumps(data)
   website = Website.query.filter_by(user_id=user_id).first()
   if website is None:
-    return jsonify(message="There is no website to update."), 404
+    return jsonify(error=True, message='There is no website to update.'), 404
   website.update_site(new_site_props)
-  return jsonify(), 200
+  return jsonify(error=False, message='Website Updated!'), 201
