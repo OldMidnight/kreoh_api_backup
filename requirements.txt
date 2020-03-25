@@ -10,3 +10,4 @@ Flask-JWT-Extended
 selenium
 gunicorn
 boto3
+redis
