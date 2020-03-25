@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify, Response
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from .models import WebsiteStats, User
+from .models import WebsiteStats, KreohUser
 from datetime import datetime, timedelta
 
 bp = Blueprint('stats', __name__, url_prefix='/stats')
@@ -35,7 +35,7 @@ def fetch_stats():
   value_labels = []
 
   user_id = get_jwt_identity()
-  user_domain = User.query.filter_by(id=user_id).first().domain
+  user_domain = KreohUser.query.filter_by(id=user_id).first().domain
   stats = WebsiteStats.query.filter(WebsiteStats.domain == user_domain, WebsiteStats.visit_date_time > (current_time - timedelta(days=6)), WebsiteStats.cta_inter).all()
   data = {
     '0': [],

@@ -119,7 +119,7 @@ class WebsiteStats(db.Model):
         db.session.commit()
 
 
-class User(db.Model):
+class KreohUser(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     domain = db.Column(db.String(20), nullable=False, unique=True)
     email = db.Column(db.String, nullable=False, unique=True)

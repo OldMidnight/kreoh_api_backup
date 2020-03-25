@@ -3,7 +3,7 @@ from datetime import timedelta
 from pathlib import Path
 from flask import Blueprint, request, jsonify, Response, current_app
 from flask_jwt_extended import jwt_required, get_jwt_identity, jwt_refresh_token_required, create_access_token
-from .models import Website, User, WebsiteStats
+from .models import Website, KreohUser, WebsiteStats
 from .s3 import s3, FileStore
 
 bp = Blueprint('helpers', __name__, url_prefix="/helpers")
@@ -25,7 +25,7 @@ def site_activation():
 def check_domain():
   domain = request.get_json()['domain']
   print(domain)
-  user = User.query.filter_by(domain=domain).first()
+  user = KreohUser.query.filter_by(domain=domain).first()
   if user:
     website = Website.query.filter_by(user_id=user.id).first()
     if website is None:
@@ -41,7 +41,7 @@ def check_domain():
 def get_site_config():
   data = request.get_json()
   domain = data['domain']
-  user = User.query.filter_by(domain=domain).first()
+  user = KreohUser.query.filter_by(domain=domain).first()
   website = Website.query.filter_by(user_id=user.id).first()
   if website is None:
     return jsonify(error="No such website")
@@ -65,7 +65,7 @@ def get_auth_site_config():
 @jwt_required
 def toggle_dark_mode():
   user_id = get_jwt_identity()
-  user = User.query.filter_by(id=user_id).first()
+  user = KreohUser.query.filter_by(id=user_id).first()
   user.toggle_dark_mode()
   return jsonify(), 204
 

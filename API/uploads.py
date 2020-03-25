@@ -3,7 +3,7 @@ import botocore
 import math
 from flask import Blueprint, request, jsonify, send_file, current_app
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from API.models import Website, Upload, User
+from API.models import Website, Upload, KreohUser
 from .s3 import s3, FileStore
 from .screenshot import ScreenshotClient
 
@@ -36,7 +36,7 @@ def convert_size(size_bytes):
 @jwt_required
 def getUploads():
     user_id = get_jwt_identity()
-    user = User.query.filter_by(id=user_id).first()
+    user = KreohUser.query.filter_by(id=user_id).first()
     uploads = user.uploads
     upload_resp = []
     for upload in uploads:
@@ -86,7 +86,7 @@ def grab_screenshot():
 @jwt_required
 def upload_file(domain, filename):
     user_id = get_jwt_identity()
-    user = User.query.filter_by(id=user_id).first()
+    user = KreohUser.query.filter_by(id=user_id).first()
     if 'upload' not in request.files:
         return jsonify(error=True, message="No File Sent."), 400
     upload_filename = filename.split('.')
@@ -138,7 +138,7 @@ def get_file(domain, filename):
 @jwt_required
 def delete_file(domain, filename):
   user_id = get_jwt_identity()
-  user = User.query.filter_by(id=user_id).first()
+  user = KreohUser.query.filter_by(id=user_id).first()
   upload = Upload.query.filter_by(url=domain + '/' + filename).first()
   if upload is None:
     return jsonify(error=True, message='No such file'), 404

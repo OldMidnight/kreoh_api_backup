@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify, current_app
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from werkzeug.security import generate_password_hash, check_password_hash
-from API.models import User, Message, Upload
+from API.models import KreohUser, Message, Upload
 from API.mail_service import MailService
 from API.token import confirm_token
 from API.s3 import FileStore, s3
@@ -31,7 +31,7 @@ def confirm_email(token):
     return jsonify(error=True, message='Link has expired.'), 403
   if not re.fullmatch(r'[^@]+@[^@]+\.[^@]+', email):
       return jsonify(error=True, message='Inavlid Email.'), 400
-  user = User.query.filter_by(id=user_id).first()
+  user = KreohUser.query.filter_by(id=user_id).first()
   user.update_email(email)
   return jsonify(error=False, message='Email Verified.'), 201
 
@@ -49,7 +49,7 @@ def password_change():
     not re.search(r'[A-Z]+', new_password):
     return jsonify(error=True, message='Invalid details.'), 400
 
-  user = User.query.filter_by(id=user_id).first()
+  user = KreohUser.query.filter_by(id=user_id).first()
   if not check_password_hash(user.password, current_password):
     return jsonify(error=True, message='Invalid details.'), 400
   mailer = MailService(current_app, ('Kreoh Support', current_app.config['MAIL_USERNAME']), user_id)
@@ -72,7 +72,7 @@ def confirm_password(token):
     not re.search(r'[A-Z]+', new_password):
     return jsonify(error=True, message='Paassword not changed. Invalid password.'), 400
   new_password = generate_password_hash(new_password)
-  user = User.query.filter_by(id=user_id).first()
+  user = KreohUser.query.filter_by(id=user_id).first()
   user.update_password(new_password)
   return jsonify(error=False, message='Password Changed.'), 202
 
@@ -80,7 +80,7 @@ def confirm_password(token):
 @jwt_required
 def delete_account():
   user_id = get_jwt_identity()
-  user = User.query.filter_by(id=user_id).first()
+  user = KreohUser.query.filter_by(id=user_id).first()
   if user is None:
     return jsonify(error=True, message='No such user'), 404
   uploads = Upload.query.filter_by(user_id=user.id).all()
@@ -95,7 +95,7 @@ def delete_account():
   for page in pages:
     store.deleteFile(user.domain + '/' + page + '.kreoh.com.png')
   user.delete()
-  user = User.query.filter_by(id=user_id).first()
+  user = KreohUser.query.filter_by(id=user_id).first()
   if user is None:
     return jsonify(error=False, message='Account Deleted.'), 201
   else:
@@ -106,7 +106,7 @@ def delete_account():
 @jwt_required
 def get_status():
   user_id = get_jwt_identity()
-  user = User.query.filter_by(id=user_id).first()
+  user = KreohUser.query.filter_by(id=user_id).first()
   raw_messages = Message.query.filter_by(user_id=user_id).all()
   messages = []
   for message in raw_messages:

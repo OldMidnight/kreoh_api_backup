@@ -2,7 +2,7 @@
 from sqlalchemy.exc import IntegrityError
 from flask import Blueprint, request, jsonify, Response
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from API.models import User, Website
+from API.models import KreohUser, Website
 import json
 
 bp = Blueprint('site_creation', __name__, url_prefix="/create")
@@ -46,7 +46,7 @@ locked_domains = [
 @bp.route('/validate_domain', methods=('POST',))
 def validate_domain():
   domain = request.get_json()['domain']
-  user = User.query.filter_by(domain=domain).first()
+  user = KreohUser.query.filter_by(domain=domain).first()
   if user is None and domain not in locked_domains:
     return jsonify(error=False), 200
   else:
@@ -56,7 +56,7 @@ def validate_domain():
 @jwt_required
 def register_website():
   user_id = get_jwt_identity()
-  user = User.query.filter_by(id=user_id).first()
+  user = KreohUser.query.filter_by(id=user_id).first()
   data = request.get_json()['site_props']
   site_props = json.loads(data)
   site_props = json.dumps(site_props)

@@ -7,7 +7,7 @@ from flask_jwt_extended import (
     jwt_refresh_token_required, create_refresh_token, get_jti, get_raw_jwt
 )
 from werkzeug.security import check_password_hash, generate_password_hash
-from API.models import User, Website
+from API.models import KreohUser, Website
 from API.mail_service import MailService
 from API.token import generate_confirmation_token, confirm_token
 from API.extensions import jwt_revoked_store
@@ -37,14 +37,14 @@ def register():
   if not domain.isalnum():
     return jsonify(error=True, message='Your domain can only contain letters and numbers!'), 400
 
-  user = User.query.filter_by(domain=domain).first()
+  user = KreohUser.query.filter_by(domain=domain).first()
   if user is None:
-    users = User.query.all()
+    users = KreohUser.query.all()
     if len(users) < 25:
-      user = User(domain=domain, email=email, f_name=f_name, s_name=s_name, password=generate_password_hash(password), account_type=4)
+      user = KreohUser(domain=domain, email=email, f_name=f_name, s_name=s_name, password=generate_password_hash(password), account_type=4)
       user.add()
 
-      user = User.query.filter_by(domain=domain).first()
+      user = KreohUser.query.filter_by(domain=domain).first()
       mailer = MailService(current_app, ('Fareed From Kreoh', current_app.config['MAIL_USERNAME']), user.id)
       mailer.send_welcome_message()
 
@@ -67,7 +67,7 @@ def login():
   data = request.get_json()
   email = data['email']
   password = data['password']
-  user = User.authenticate(email, password)
+  user = KreohUser.authenticate(email, password)
   if user:
     access_token = create_access_token(user.id, fresh=True, expires_delta=timedelta(seconds=900))
     refresh_token = create_refresh_token(user.id)
@@ -97,7 +97,7 @@ def logout_refresh():
 @jwt_required
 def get_user():
   user_id = get_jwt_identity()
-  user = User.query.filter_by(id=user_id).first()
+  user = KreohUser.query.filter_by(id=user_id).first()
   if user is None:
     return jsonify(id=None, f_name=None, s_name=None, domain=None, email=None, account_type=None, site_created=False, site_active=False, email_confirmed=None, site_props={}, dark_mode=None), 200
   else:

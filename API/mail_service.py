@@ -1,6 +1,6 @@
 # from flask import current_app
 from API.extensions import mail
-from API.models import Message, User
+from API.models import Message, KreohUser
 from API.token import generate_confirmation_token
 
 class MailService():
@@ -14,7 +14,7 @@ class MailService():
     with app.app_context():
       self.sender = sender
       if user_id is not None:
-        self.user = User.query.filter_by(id=user_id).first()
+        self.user = KreohUser.query.filter_by(id=user_id).first()
 
   def send_support_message(self, subject, recipients, body, ticket_id):
     try:
