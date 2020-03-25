@@ -16,8 +16,8 @@ class MailingList(db.Model):
 
 class TempWebsite(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False, unique=True)
-    domain = db.Column(db.String, db.ForeignKey('user.domain', ondelete='CASCADE'), nullable=False, unique=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('kreoh_user.id', ondelete='CASCADE'), nullable=False, unique=True)
+    domain = db.Column(db.String, db.ForeignKey('kreoh_user.domain', ondelete='CASCADE'), nullable=False, unique=True)
     activation_date = db.Column(db.DateTime)
     created_date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow())
     expiration_date = db.Column(db.DateTime)
@@ -44,8 +44,8 @@ class TempWebsite(db.Model):
 
 class Website(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False, unique=True)
-    domain = db.Column(db.String, db.ForeignKey('user.domain', ondelete='CASCADE'), nullable=False, unique=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('kreoh_user.id', ondelete='CASCADE'), nullable=False, unique=True)
+    domain = db.Column(db.String, db.ForeignKey('kreoh_user.domain', ondelete='CASCADE'), nullable=False, unique=True)
     activation_date = db.Column(db.DateTime)
     created_date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow())
     active = db.Column(db.Boolean, nullable=False, default=False)
@@ -86,7 +86,7 @@ class Upload(db.Model):
     upload_date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow())
     ext = db.Column(db.String)
     label = db.Column(db.String, nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('kreoh_user.id', ondelete='CASCADE'), nullable=False)
 
     def add(self):
         db.session.add(self)
@@ -132,7 +132,7 @@ class KreohUser(db.Model):
     account_type = db.Column(db.Integer, nullable=False, default=0)
     storage_space = db.Column(db.Integer, nullable=False, default=100000000)
     dark_mode = db.Column(db.Boolean, nullable=False, default=False)
-    uploads = db.relationship('Upload', backref='user', lazy=True)
+    uploads = db.relationship('Upload', backref='kreoh_user', lazy=True)
 
     def add(self):
         db.session.add(self)
@@ -176,7 +176,7 @@ class KreohUser(db.Model):
 class Message(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     support_ticket_id = db.Column(db.Integer, db.ForeignKey('support_message.id', ondelete='CASCADE'))
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('kreoh_user.id', ondelete='CASCADE'), nullable=False)
     sender_name = db.Column(db.String, nullable=False)
     sender_address = db.Column(db.String, nullable=False)
     subject = db.Column(db.String, nullable=False)
@@ -195,7 +195,7 @@ class Message(db.Model):
 
 class SupportMessage(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('kreoh_user.id', ondelete='CASCADE'), nullable=False)
     subject = db.Column(db.String, nullable=False)
     body = db.Column(db.String, nullable=False)
     time_sent = db.Column(db.DateTime, nullable=False, default=datetime.utcnow())
